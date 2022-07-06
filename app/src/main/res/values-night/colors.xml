@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="Primary">#8E4444</color>
+    <color name="PrimaryVariant">#802B2B</color>
+    <color name="background">#000000</color>
+    <color name="lightbackground">#333333</color>
+    <color name="stressbackground">#101010</color>
+    <color name="text">#F8F8F8</color>
+
+    <color name="goldenrod">#6E5311</color>
+    <color name="lemonchiffon">#9F9C81</color>
+    <color name="lightcyan">#809191</color>
+</resources>

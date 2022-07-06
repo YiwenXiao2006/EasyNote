@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/DrawerLayout_MainUI"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.MainUI">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            tools:context="com.XYW.scoremanage.ui.MainMenu">
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="50dp">
+
+
+                <com.google.android.material.appbar.AppBarLayout
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:theme="@style/Theme.EasyNote.AppBarOverlay"
+                    android:background="@color/Primary">
+
+                    <View
+                        android:id="@+id/status_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="20dp" />
+
+                    <include layout="@layout/content_toolbar" />
+                </com.google.android.material.appbar.AppBarLayout>
+
+
+                <FrameLayout
+                    android:id="@+id/FrameLayout_MainUI"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/stressbackground"
+                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+            </LinearLayout>
+
+            <com.google.android.material.bottomnavigation.BottomNavigationView
+                android:id="@+id/BottomNavigationView_MainUI"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:background="?android:attr/windowBackground"
+                android:minHeight="?attr/actionBarSize"
+                app:backgroundTint="@color/lightbackground"
+                app:elevation="10dp"
+                app:itemRippleColor="@null"
+                app:itemTextColor="@color/PrimaryVariant"
+                app:labelVisibilityMode="selected"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:menu="@menu/menu_bottom_nav_mainui" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@color/background">
+        <com.google.android.material.navigation.NavigationView
+            android:id="@+id/NavigationView_drawerlayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:fitsSystemWindows="true"
+            app:menu="@menu/menu_nav_drawerlayout"
+            app:insetForeground="@android:color/transparent" />
+    </LinearLayout>
+</androidx.drawerlayout.widget.DrawerLayout>

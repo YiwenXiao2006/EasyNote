@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">易记事</string>
+
+    <string name="title_note">笔记</string>
+    <string name="title_todo">待办事项</string>
+    <string name="title_settings">设置</string>
+    <string name="text_fragment_note_template_holiday_title">开始一个笔记!</string>
+    <string name="text_fragment_note_template_holiday_subtitle">节日模板</string>
+    <string name="text_fragment_note_template_summer_title">记录生活!</string>
+    <string name="text_fragment_note_template_summer_subtitle">夏日</string>
+    <string name="text_fragment_note_mynotes_title">我的笔记</string>
+</resources>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.XYW.easynote.ui.DetailViewPager
+            android:id="@+id/ViewPager_templateNote"
+            android:layout_width="match_parent"
+            android:layout_height="200dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/text_fragment_note_mynotes_title"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
+            android:textSize="20sp"
+            android:textColor="@color/text"
+            android:textStyle="bold" />
+    </LinearLayout>
+</ScrollView>

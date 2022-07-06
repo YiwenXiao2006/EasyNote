@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/group_control">
+        <item
+            android:id="@+id/navigation_settings"
+            android:title="@string/title_settings"
+            android:icon="@drawable/interactive_settings" />
+    </group>
+</menu>
