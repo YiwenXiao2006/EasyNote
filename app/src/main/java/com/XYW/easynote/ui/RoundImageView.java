@@ -70,7 +70,7 @@ public class RoundImageView extends androidx.appcompat.widget.AppCompatImageView
         mBitmapShader.setLocalMatrix(mMatrix);
         // 设置shader
         mPaint.setShader(mBitmapShader);
-        canvas.drawRoundRect(new RectF(0,0,getWidth(),getHeight()), mBorderRadius, mBorderRadius,
+        canvas.drawRoundRect(new RectF(0, 0, getWidth(), getHeight()), mBorderRadius, mBorderRadius,
                 mPaint);
     }
 

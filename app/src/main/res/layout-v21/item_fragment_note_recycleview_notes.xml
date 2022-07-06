@@ -11,5 +11,36 @@
         app:cardCornerRadius="5dp"
         app:cardMaxElevation="5dp">
 
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/shape_gradient_red">
+
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@color/white"
+                    app:radius="50dp" />
+                <com.XYW.easynote.ui.RoundImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1"
+                    android:layout_margin="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="ddk"
+                    android:textSize="13sp"
+                    android:textColor="@color/text"/>
+            </LinearLayout>
+        </RelativeLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>
