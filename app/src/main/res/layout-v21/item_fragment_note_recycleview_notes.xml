@@ -11,6 +11,5 @@
         app:cardCornerRadius="5dp"
         app:cardMaxElevation="5dp">
 
-
     </androidx.cardview.widget.CardView>
 </LinearLayout>
