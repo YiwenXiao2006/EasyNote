@@ -16,17 +16,17 @@
             android:layout_height="match_parent"
             android:background="@drawable/shape_gradient_red">
 
-
+            <com.XYW.easynote.ui.RoundImageView
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/shape_fragment_note_recycleview_icon"
+                app:radius="5dp" />
 
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
-                <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:background="@color/white"
-                    app:radius="50dp" />
+
                 <com.XYW.easynote.ui.RoundImageView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"

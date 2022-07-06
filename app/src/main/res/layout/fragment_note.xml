@@ -19,11 +19,12 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:text="@string/text_fragment_note_mynotes_title"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
             android:textSize="20sp"
             android:textColor="@color/text"
             android:textStyle="bold" />
+
         <include layout="@layout/item_fragment_note_recycleview_notes" />
     </LinearLayout>
 </ScrollView>
