@@ -51,14 +51,7 @@ public class NoteFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         this.container = container;
-        new MessageBox.CreateMessageBox.Builder(requireContext())
-                .setTitle("test")
-                .setIcon(R.drawable.direction_caret_up)
-                .setMessage("test")
-                .setPositiveButton("test", null)
-                .setNegativeButton("test", null)
-                .create()
-                .show();
+
         init(view);
         return view;
     }
