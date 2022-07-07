@@ -4,7 +4,7 @@
     <color name="PrimaryVariant">#E55353</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="background">#EFEFEF</color>
+    <color name="background">#F8F8F8</color>
     <color name="lightbackground">#FFFFFF</color>
     <color name="stressbackground">#FFFFFF</color>
     <color name="text">#030303</color>
