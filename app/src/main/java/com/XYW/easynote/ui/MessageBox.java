@@ -3,6 +3,7 @@ package com.XYW.easynote.ui;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -98,7 +99,11 @@ public class MessageBox {
                 TextView_Content.setText(str);
                 TextView_Content.setVisibility(View.VISIBLE);
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) ProgressBar.getLayoutParams();
-                params.setMarginEnd(10);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    params.setMarginEnd(10);
+                } else {
+                    params.setMargins(0, 0, 10, 0);
+                }
                 ProgressBar.setLayoutParams(params);
                 return this;
             }

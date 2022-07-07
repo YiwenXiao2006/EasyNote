@@ -133,6 +133,7 @@
                 android:textColor="@color/text"
                 android:textSize="13sp"
                 android:textStyle="bold"
+                android:textAllCaps="false"
                 app:backgroundTint="#C5C7C9" />
 
             <View
@@ -149,8 +150,9 @@
                 android:layout_weight="1"
                 android:background="@drawable/ic_messageboxbutton"
                 android:textSize="13sp"
-                android:textColor="@color/Primary"
+                android:textColor="#F97777"
                 android:textStyle="bold"
+                android:textAllCaps="false"
                 app:backgroundTint="#C5C7C9" />
         </LinearLayout>
     </LinearLayout>

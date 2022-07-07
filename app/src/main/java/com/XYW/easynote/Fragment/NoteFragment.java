@@ -20,6 +20,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.DetailViewPager;
+import com.XYW.easynote.ui.MessageBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +51,14 @@ public class NoteFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         this.container = container;
+        new MessageBox.CreateMessageBox.Builder(requireContext())
+                .setTitle("test")
+                .setIcon(R.drawable.direction_caret_up)
+                .setMessage("test")
+                .setPositiveButton("test", null)
+                .setNegativeButton("test", null)
+                .create()
+                .show();
         init(view);
         return view;
     }
