@@ -14,7 +14,7 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/img_notes_recycleview_background">
+            android:background="@drawable/img_notes_recyclerview_background">
 
             <LinearLayout
                 android:orientation="vertical"
@@ -24,8 +24,8 @@
                 <com.XYW.easynote.ui.RoundImageView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:layout_margin="5dp" />
+                    android:layout_margin="5dp"
+                    android:layout_weight="1" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -41,7 +41,7 @@
             <com.XYW.easynote.ui.RoundImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/shape_fragment_note_recycleview_icon"
+                android:background="@drawable/shape_fragment_note_recyclerview_icon"
                 app:radius="5dp" />
         </RelativeLayout>
     </androidx.cardview.widget.CardView>

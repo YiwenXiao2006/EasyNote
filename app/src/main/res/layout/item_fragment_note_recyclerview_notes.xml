@@ -19,7 +19,7 @@
         <com.XYW.easynote.ui.RoundImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@drawable/img_notes_recycleview_background"
+            app:srcCompat="@drawable/img_notes_recyclerview_background"
             app:radius="5dp" />
 
         <LinearLayout
@@ -47,7 +47,7 @@
         <com.XYW.easynote.ui.RoundImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:background="@drawable/shape_fragment_note_recycleview_icon"
+            android:background="@drawable/shape_fragment_note_recyclerview_icon"
             app:radius="5dp" />
     </RelativeLayout>
 </LinearLayout>
