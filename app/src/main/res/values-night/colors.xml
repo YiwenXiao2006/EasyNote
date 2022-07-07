@@ -6,6 +6,7 @@
     <color name="lightbackground">#333333</color>
     <color name="stressbackground">#101010</color>
     <color name="text">#F8F8F8</color>
+    <color name="subtext">#BFBDBD</color>
 
     <color name="goldenrod">#6E5311</color>
     <color name="lemonchiffon">#9F9C81</color>

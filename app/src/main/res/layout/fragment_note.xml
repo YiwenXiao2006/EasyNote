@@ -24,7 +24,5 @@
             android:textSize="20sp"
             android:textColor="@color/text"
             android:textStyle="bold" />
-
-        <include layout="@layout/item_fragment_note_recycleview_notes" />
     </LinearLayout>
 </ScrollView>
