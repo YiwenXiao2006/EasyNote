@@ -28,12 +28,14 @@
             android:orientation="vertical">
 
             <com.XYW.easynote.ui.RoundImageView
+                android:id="@+id/RoundImageView_noteImg"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_margin="5dp"
                 android:layout_weight="1" />
 
             <TextView
+                android:id="@+id/TextView_noteTitle"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:gravity="center_vertical"
@@ -45,6 +47,7 @@
         </LinearLayout>
 
         <com.XYW.easynote.ui.RoundImageView
+            android:id="@+id/RoundImageView_noteIcon"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:background="@drawable/shape_fragment_note_recyclerview_icon"

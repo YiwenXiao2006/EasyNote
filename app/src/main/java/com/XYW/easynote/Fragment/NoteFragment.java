@@ -2,8 +2,11 @@ package com.XYW.easynote.Fragment;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,13 +18,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.DetailViewPager;
-import com.XYW.easynote.ui.MessageBox;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -32,6 +37,7 @@ public class NoteFragment extends Fragment {
     private static final String TAG = "NoteFragment";
 
     private DetailViewPager ViewPager_templateNote;
+    private RecyclerView RecyclerView_notes;
 
     private ViewGroup container;
     private Context context;
@@ -58,6 +64,7 @@ public class NoteFragment extends Fragment {
 
     private void init(View view) {
         initViewPager(view);
+        initRecyclerView(view);
     }
 
     private void initViewPager(View view) {
@@ -121,6 +128,14 @@ public class NoteFragment extends Fragment {
         });
     }
 
+    private void initRecyclerView(View view) {
+        RecyclerView_notes = view.findViewById(R.id.RecyclerView_notes);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
+        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
+        RecyclerView_notes.setLayoutManager(layoutManager);
+
+    }
+
     private void getTheViewPagerRoll() {
         TimerTask timerTask_Viewpager = new TimerTask() {
             @Override
@@ -158,6 +173,114 @@ public class NoteFragment extends Fragment {
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.context = context;
+    }
+
+    public static class Note implements Parcelable {
+
+        private String File_Path, File_Name, File_End, title, img_Path, background_Path;
+
+        public Note(String file_Path, String file_Name, String file_End, String title) {
+            this.File_Path = file_Path;
+            this.File_Name = file_Name;
+            this.File_End = file_End;
+            this.title = title;
+            this.img_Path = null;
+            this.background_Path = null;
+        }
+
+        public Note(String file_Path, String file_Name, String file_End, String title, String img, String background) {
+            this.File_Path = file_Path;
+            this.File_Name = file_Name;
+            this.File_End = file_End;
+            this.title = title;
+            this.img_Path = img;
+            this.background_Path = background;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public void setFile_Path(String file_Path) {
+            File_Path = file_Path;
+        }
+
+        public void setFile_Name(String file_Name) {
+            File_Name = file_Name;
+        }
+
+        public void setFile_End(String file_End) {
+            File_End = file_End;
+        }
+
+        public void setImg_Path(String img_Path) {
+            this.img_Path = img_Path;
+        }
+
+        public void setBackground_Path(String background_Path) {
+            this.background_Path = background_Path;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getFile_Path() {
+            return File_Path;
+        }
+
+        public String getFile_Name() {
+            return File_Name;
+        }
+
+        public String getFile_End() {
+            return File_End;
+        }
+
+        public String getImg_Path() {
+            return img_Path;
+        }
+
+        public String getBackground_Path() {
+            return background_Path;
+        }
+
+        protected Note(Parcel in) {
+            this.File_Path = in.readString();
+            this.File_Name = in.readString();
+            this.File_End = in.readString();
+            this.title = in.readString();
+            this.img_Path = in.readString();
+            this.background_Path = in.readString();
+            //BitmapFactory.decodeFile();
+        }
+
+        public static final Creator<Note> CREATOR = new Creator<Note>() {
+            @Override
+            public Note createFromParcel(Parcel in) {
+                return new Note(in);
+            }
+
+            @Override
+            public Note[] newArray(int size) {
+                return new Note[size];
+            }
+        };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int i) {
+            parcel.writeString(File_Path);
+            parcel.writeString(File_Name);
+            parcel.writeString(File_End);
+            parcel.writeString(title);
+            parcel.writeString(img_Path);
+            parcel.writeString(background_Path);
+        }
     }
 
     public static class ViewPagerAdapter extends PagerAdapter {
