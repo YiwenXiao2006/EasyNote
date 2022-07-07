@@ -11,18 +11,15 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.annotation.SuppressLint;
 import android.app.UiModeManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -49,9 +46,8 @@ public class MainUI extends AppCompatActivity {
     private TextView TextView_toolbarTitle;
     private DrawerLayout DrawerLayout_MainUI;
 
-    private SharedPreferences preferences;
     private SharedPreferences.Editor editor;
-    private boolean darkmode = false, drawerOpen = false;
+    private boolean darkMode = false, drawerOpen = false;
     private int system_ui_mode = UiModeManager.MODE_NIGHT_NO;
 
     @Override
@@ -64,9 +60,9 @@ public class MainUI extends AppCompatActivity {
             ActivityManager.setActivity(this, findViewById(R.id.status_bar));
         }
 
-        preferences = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+        SharedPreferences preferences = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
         editor = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS).edit();
-        darkmode = preferences.getBoolean("darkmode", false);
+        darkMode = preferences.getBoolean("darkMode", false);
 
         if (savedInstanceState != null) {
             system_ui_mode = savedInstanceState.getInt("system_ui_mode", UiModeManager.MODE_NIGHT_NO);
@@ -157,7 +153,7 @@ public class MainUI extends AppCompatActivity {
         Menu menu = navigationView_drawerlayout.getMenu();
         MenuItem item = menu.findItem(R.id.navigation_darkmode);
         LinearLayout linearLayout = (LinearLayout) item.getActionView();
-        SwitchButton switchButton_darkmode = linearLayout.findViewById(R.id.SwitchButton_darkmode);
+        SwitchButton switchButton_darkMode = linearLayout.findViewById(R.id.SwitchButton_darkmode);
 
         UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
         if (system_ui_mode != uiModeManager.getNightMode() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
@@ -171,31 +167,30 @@ public class MainUI extends AppCompatActivity {
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES) {
             item.setEnabled(false);
-            switchButton_darkmode.setChecked(!(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1));
-            switchButton_darkmode.setEnabled(false);
+            switchButton_darkMode.setChecked(!(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1));
+            switchButton_darkMode.setEnabled(false);
         } else {
-            switchButton_darkmode.setChecked(darkmode);
-            if (darkmode && (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
+            switchButton_darkMode.setChecked(darkMode);
+            if (darkMode && (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
                 getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
                 recreate();
-            } else if (!darkmode && (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+            } else if (!darkMode && (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
                 getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
                 recreate();
             }
-            switchButton_darkmode.setOnCheckedChangeListener((view, isChecked) -> {
-                if (switchButton_darkmode.isChecked()) {
+            switchButton_darkMode.setOnCheckedChangeListener((view, isChecked) -> {
+                if (switchButton_darkMode.isChecked()) {
                     getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-                    editor.putBoolean("darkmode", true).commit();
-                    recreate();
+                    editor.putBoolean("darkMode", true).commit();
                 } else {
                     getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-                    editor.putBoolean("darkmode", false).commit();
-                    recreate();
+                    editor.putBoolean("darkMode", false).commit();
                 }
+                recreate();
             });
         }
 
-        switchButton_darkmode.setOnTouchListener((view, motionEvent) -> {
+        switchButton_darkMode.setOnTouchListener((view, motionEvent) -> {
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     DrawerLayout_MainUI.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN); //关闭手势滑动
@@ -215,7 +210,7 @@ public class MainUI extends AppCompatActivity {
                     WindowManager.showToast(MainUI.this, getString(R.string.title_settings));
                     break;
                 case R.id.navigation_darkmode:
-                    switchButton_darkmode.setChecked(!switchButton_darkmode.isChecked());
+                    switchButton_darkMode.setChecked(!switchButton_darkMode.isChecked());
                     break;
                 default:
                     break;
