@@ -1,8 +1,10 @@
 package com.XYW.easynote.util;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -12,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActivityManager {
+
+    private static final String TAG = "ActivityManager";
 
     private static final List<Activity> activities = new ArrayList<>();
 
@@ -57,26 +61,23 @@ public class ActivityManager {
      * @param activity 需要设置状态栏的活动
      */
     public static void setStatusBar(Activity activity) {
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             return;
         }
 
         Window window = activity.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         //深色模式的值为:0x21
-        //浅色模式的值为:0x11
-        if (com.XYW.easynote.util.WindowManager.getUIMode(activity) == 0x21) {
+        //浅色模式的值为:0x11 com.XYW.easynote.util.WindowManager.getUIMode(activity) == 0x11
+        if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
             //恢复状态栏白色字体
             com.XYW.easynote.util.WindowManager.setWhiteStatusBar(window);
-        } else if (com.XYW.easynote.util.WindowManager.getUIMode(activity) == 0x11) {
+        } else if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
             //设置状态栏黑色字体
             com.XYW.easynote.util.WindowManager.setBlackStatusBar(window);
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-            window.setStatusBarColor(Color.TRANSPARENT);
-        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.TRANSPARENT);
     }
 
     /**
@@ -85,9 +86,9 @@ public class ActivityManager {
      * @param view 填补状态栏位置的View
      */
     public static void setStatusBar(Activity activity, View view) {
-
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             view.setVisibility(View.GONE);
+            Log.d(TAG, "setStatusBar: ");
             return;
         }
 
@@ -95,10 +96,10 @@ public class ActivityManager {
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         //深色模式的值为:0x21
         //浅色模式的值为:0x11
-        if (activity.getApplicationContext().getResources().getConfiguration().uiMode == 0x21) {
+        if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
             //恢复状态栏白色字体
             window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-        } else if (activity.getApplicationContext().getResources().getConfiguration().uiMode == 0x11) {
+        } else if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
             //设置状态栏黑色字体
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
