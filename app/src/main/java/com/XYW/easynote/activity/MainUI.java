@@ -17,8 +17,10 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -36,6 +38,8 @@ import com.google.android.material.navigation.NavigationView;
 import com.suke.widget.SwitchButton;
 
 public class MainUI extends AppCompatActivity {
+
+    private static final String TAG = "MainUI";
 
     private TextView TextView_toolbarTitle;
     private DrawerLayout DrawerLayout_MainUI;
@@ -115,7 +119,7 @@ public class MainUI extends AppCompatActivity {
         }
     }
 
-    @SuppressLint("NonConstantResourceId")
+    @SuppressLint({"NonConstantResourceId", "ClickableViewAccessibility"})
     private void initNavigationView() {
         NavigationView navigationView_drawerlayout = findViewById(R.id.NavigationView_drawerlayout);
 
@@ -125,18 +129,32 @@ public class MainUI extends AppCompatActivity {
         com.suke.widget.SwitchButton switchButton_darkmode = linearLayout.findViewById(R.id.SwitchButton_darkmode);
         switchButton_darkmode.setOnCheckedChangeListener((view, isChecked) -> {
         });
+        switchButton_darkmode.setOnTouchListener((view, motionEvent) -> {
+            switch (motionEvent.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    DrawerLayout_MainUI.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN); //关闭手势滑动
+                    break;
+                case MotionEvent.ACTION_UP:
+                    DrawerLayout_MainUI.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);    //开启手势滑动
+                    break;
+                default:
+                    break;
+            }
+            return false;
+        });
 
-        navigationView_drawerlayout.setNavigationItemSelectedListener(item1 -> {switch (item1.getItemId()) {
-            case R.id.navigation_settings:
-                WindowManager.showToast(MainUI.this, getString(R.string.title_settings));
-                break;
-            case R.id.navigation_darkmode:
-                WindowManager.showToast(MainUI.this, getString(R.string.title_darkmode));
-                switchButton_darkmode.setChecked(!switchButton_darkmode.isChecked());
-                break;
-            default:
-                break;
-        }
+        navigationView_drawerlayout.setNavigationItemSelectedListener(item1 -> {
+            switch (item1.getItemId()) {
+                case R.id.navigation_settings:
+                    WindowManager.showToast(MainUI.this, getString(R.string.title_settings));
+                    break;
+                case R.id.navigation_darkmode:
+                    WindowManager.showToast(MainUI.this, getString(R.string.title_darkmode));
+                    switchButton_darkmode.setChecked(!switchButton_darkmode.isChecked());
+                    break;
+                default:
+                    break;
+            }
             return false;
         });
         View View_nav_status_bar = navigationView_drawerlayout.inflateHeaderView(R.layout.content_nav_drawerlayout_header).findViewById(R.id.nav_status_bar);
@@ -152,7 +170,6 @@ public class MainUI extends AppCompatActivity {
     private void initDrawerLayout() {
         Window window = getWindow();
         DrawerLayout_MainUI = findViewById(R.id.DrawerLayout_MainUI);
-        DrawerLayout_MainUI.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);//关闭手势滑动
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             return;
         }
