@@ -17,6 +17,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +33,12 @@ import com.XYW.easynote.util.ActivityManager;
 import com.XYW.easynote.util.WindowManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.suke.widget.SwitchButton;
 
 public class MainUI extends AppCompatActivity {
 
     private TextView TextView_toolbarTitle;
     private DrawerLayout DrawerLayout_MainUI;
-    private NavigationView NavigationView_drawerlayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,18 +117,29 @@ public class MainUI extends AppCompatActivity {
 
     @SuppressLint("NonConstantResourceId")
     private void initNavigationView() {
-        NavigationView_drawerlayout = (NavigationView) findViewById(R.id.NavigationView_drawerlayout);
-        NavigationView_drawerlayout.setNavigationItemSelectedListener(item -> {
-            switch (item.getItemId()) {
-                case R.id.navigation_settings:
-                    WindowManager.showToast(MainUI.this, getString(R.string.title_settings));
-                    break;
-                default:
-                    break;
-            }
+        NavigationView navigationView_drawerlayout = findViewById(R.id.NavigationView_drawerlayout);
+
+        Menu menu = navigationView_drawerlayout.getMenu();
+        MenuItem item = menu.findItem(R.id.navigation_darkmode);
+        LinearLayout linearLayout = (LinearLayout) item.getActionView();
+        com.suke.widget.SwitchButton switchButton_darkmode = linearLayout.findViewById(R.id.SwitchButton_darkmode);
+        switchButton_darkmode.setOnCheckedChangeListener((view, isChecked) -> {
+        });
+
+        navigationView_drawerlayout.setNavigationItemSelectedListener(item1 -> {switch (item1.getItemId()) {
+            case R.id.navigation_settings:
+                WindowManager.showToast(MainUI.this, getString(R.string.title_settings));
+                break;
+            case R.id.navigation_darkmode:
+                WindowManager.showToast(MainUI.this, getString(R.string.title_darkmode));
+                switchButton_darkmode.setChecked(!switchButton_darkmode.isChecked());
+                break;
+            default:
+                break;
+        }
             return false;
         });
-        View View_nav_status_bar = NavigationView_drawerlayout.inflateHeaderView(R.layout.content_nav_drawerlayout_header).findViewById(R.id.nav_status_bar);
+        View View_nav_status_bar = navigationView_drawerlayout.inflateHeaderView(R.layout.content_nav_drawerlayout_header).findViewById(R.id.nav_status_bar);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             View_nav_status_bar.setVisibility(View.GONE);
         } else {
@@ -140,6 +152,7 @@ public class MainUI extends AppCompatActivity {
     private void initDrawerLayout() {
         Window window = getWindow();
         DrawerLayout_MainUI = findViewById(R.id.DrawerLayout_MainUI);
+        DrawerLayout_MainUI.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);//关闭手势滑动
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             return;
         }

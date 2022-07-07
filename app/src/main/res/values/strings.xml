@@ -5,6 +5,7 @@
     <string name="title_note">Note</string>
     <string name="title_todo">Todo</string>
     <string name="title_settings">Settings</string>
+    <string name="title_darkmode">Night</string>
     <string name="text_fragment_note_template_holiday_title">Start a note!</string>
     <string name="text_fragment_note_template_holiday_subtitle">Holiday</string>
     <string name="text_fragment_note_template_summer_title">Record life!</string>

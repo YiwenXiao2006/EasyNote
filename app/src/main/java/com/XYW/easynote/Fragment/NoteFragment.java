@@ -1,8 +1,9 @@
 package com.XYW.easynote.Fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
@@ -25,8 +26,8 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.DetailViewPager;
+import com.XYW.easynote.ui.RoundImageView;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -134,6 +135,14 @@ public class NoteFragment extends Fragment {
         layoutManager.setOrientation(RecyclerView.HORIZONTAL);
         RecyclerView_notes.setLayoutManager(layoutManager);
 
+        List<Note> notes = new ArrayList<>();
+        notes.add(new Note(null, null, null, "test"));
+        notes.add(new Note(null, null, null, "test2"));
+        notes.add(new Note(null, null, null, "test3"));
+        notes.add(new Note(null, null, null, "test4"));
+        notes.add(new Note(null, null, null, "test5"));
+        NoteAdapter adapter = new NoteAdapter(notes);
+        RecyclerView_notes.setAdapter(adapter);
     }
 
     private void getTheViewPagerRoll() {
@@ -177,14 +186,14 @@ public class NoteFragment extends Fragment {
 
     public static class Note implements Parcelable {
 
-        private String File_Path, File_Name, File_End, title, img_Path, background_Path;
+        private String File_Path, File_Name, File_End, title, icon_Path, background_Path;
 
         public Note(String file_Path, String file_Name, String file_End, String title) {
             this.File_Path = file_Path;
             this.File_Name = file_Name;
             this.File_End = file_End;
             this.title = title;
-            this.img_Path = null;
+            this.icon_Path = null;
             this.background_Path = null;
         }
 
@@ -193,7 +202,7 @@ public class NoteFragment extends Fragment {
             this.File_Name = file_Name;
             this.File_End = file_End;
             this.title = title;
-            this.img_Path = img;
+            this.icon_Path = img;
             this.background_Path = background;
         }
 
@@ -213,8 +222,8 @@ public class NoteFragment extends Fragment {
             File_End = file_End;
         }
 
-        public void setImg_Path(String img_Path) {
-            this.img_Path = img_Path;
+        public void setIcon_Path(String icon_Path) {
+            this.icon_Path = icon_Path;
         }
 
         public void setBackground_Path(String background_Path) {
@@ -237,8 +246,8 @@ public class NoteFragment extends Fragment {
             return File_End;
         }
 
-        public String getImg_Path() {
-            return img_Path;
+        public String getIcon_Path() {
+            return icon_Path;
         }
 
         public String getBackground_Path() {
@@ -250,7 +259,7 @@ public class NoteFragment extends Fragment {
             this.File_Name = in.readString();
             this.File_End = in.readString();
             this.title = in.readString();
-            this.img_Path = in.readString();
+            this.icon_Path = in.readString();
             this.background_Path = in.readString();
             //BitmapFactory.decodeFile();
         }
@@ -278,8 +287,54 @@ public class NoteFragment extends Fragment {
             parcel.writeString(File_Name);
             parcel.writeString(File_End);
             parcel.writeString(title);
-            parcel.writeString(img_Path);
+            parcel.writeString(icon_Path);
             parcel.writeString(background_Path);
+        }
+    }
+
+    private static class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
+
+        private final List<Note> mNotes;
+
+        static class ViewHolder extends RecyclerView.ViewHolder {
+
+            TextView TextView_noteTitle;
+            RoundImageView RoundImageView_noteIcon, RoundImageView_noteImg;
+
+            public ViewHolder(View view) {
+                super(view);
+                TextView_noteTitle = view.findViewById(R.id.TextView_noteTitle);
+                RoundImageView_noteIcon = view.findViewById(R.id.RoundImageView_noteIcon);
+                RoundImageView_noteImg = view.findViewById(R.id.RoundImageView_noteImg);
+            }
+        }
+
+        public NoteAdapter(List<Note> mNotes) {
+            this.mNotes = mNotes;
+        }
+
+        @NonNull
+        @Override
+        public NoteAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.item_fragment_note_recyclerview_notes, parent, false);
+            return new ViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(NoteAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
+            Note note = mNotes.get(pos);
+            holder.setIsRecyclable(false);
+            holder.TextView_noteTitle.setText(note.getTitle());
+            if (note.getBackground_Path() != null)
+                holder.RoundImageView_noteImg.setImageBitmap(BitmapFactory.decodeFile(note.getBackground_Path()));
+            if (note.getIcon_Path() != null)
+                holder.RoundImageView_noteIcon.setImageBitmap(BitmapFactory.decodeFile(note.getIcon_Path()));
+        }
+
+        @Override
+        public int getItemCount() {
+            return this.mNotes.size();
         }
     }
 
