@@ -56,7 +56,7 @@ public class UIManager {
 
     public static class FullyLinearLayoutManager extends LinearLayoutManager {
 
-        public FullyLinearLayoutManager(Context context, RecyclerView recyclerView) {
+        public FullyLinearLayoutManager(Context context) {
             super(context);
         }
 
@@ -65,6 +65,20 @@ public class UIManager {
         }
 
         private final int[] mMeasuredDimension = new int[2];
+        private boolean mCanVerticalScroll = true;
+
+        @Override
+        public boolean canScrollVertically() {
+            if (!mCanVerticalScroll){
+                return false;
+            }else {
+                return super.canScrollVertically();
+            }
+        }
+
+        public void setmCanVerticalScroll(boolean b) {
+            mCanVerticalScroll = b;
+        }
 
         @Override
         public void onMeasure(@NonNull RecyclerView.Recycler recycler, @NonNull RecyclerView.State state,

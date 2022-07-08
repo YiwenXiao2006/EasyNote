@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -33,6 +34,7 @@ import com.XYW.easynote.util.UIManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -42,19 +44,19 @@ public class NoteFragment extends Fragment {
 
     private DetailViewPager ViewPager_templateNote;
     private RecyclerView RecyclerView_notes;
+    private ScrollView ScrollView_fragment_note;
 
     private ViewGroup container;
     private Context context;
     private Activity activity;
 
     private int AllCount_viewpager = 0, CountNow_viewpager = 0;
-    private static int SavedCount_viewpager, RecyclerView_notes_firstItem = 0;
-    private static float RecyclerView_notes_Offset;
+    private static int SavedCount_viewpager, ScrollView_fragment_note_ScrollY;
     private boolean isMax_viewpager;
     private Timer Timer_viewpager = new Timer();
     private Handler.Callback Hander_viewpager;
 
-    private static List<NoteKind> noteKinds = new ArrayList<>();
+    private static final List<NoteKind> noteKinds = new ArrayList<>();
 
     public NoteFragment() {
 
@@ -65,11 +67,6 @@ public class NoteFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         this.container = container;
-
-        if (savedInstanceState != null) {
-            RecyclerView_notes_firstItem = savedInstanceState.getInt("ARGS_SCROLL_POS_NOTES");
-            RecyclerView_notes_Offset = savedInstanceState.getFloat("ARGS_SCROLL_OFFSET_NOTES");
-        }
         init(view);
         return view;
     }
@@ -78,7 +75,9 @@ public class NoteFragment extends Fragment {
     public void onPause () {
         super.onPause();
         SavedCount_viewpager = CountNow_viewpager;
-        getLayoutManager(RecyclerView_notes);
+        if (ScrollView_fragment_note != null) {
+            ScrollView_fragment_note_ScrollY = ScrollView_fragment_note.getScrollY();
+        }
     }
 
     @Override
@@ -89,39 +88,31 @@ public class NoteFragment extends Fragment {
             CountNow_viewpager = SavedCount_viewpager;
             ViewPager_templateNote.setCurrentItem(SavedCount_viewpager);
         }
+        if (ScrollView_fragment_note != null) {
+            ScrollView_fragment_note.setScrollY(ScrollView_fragment_note_ScrollY);
+        }
     }
 
     @Override
     public void onSaveInstanceState (@NonNull Bundle outState){
         super.onSaveInstanceState(outState);
-        getLayoutManager(RecyclerView_notes);
-        outState.putInt("ARGS_SCROLL_POS_NOTES", RecyclerView_notes_firstItem);
-        outState.putFloat("ARGS_SCROLL_OFFSET_NOTES", RecyclerView_notes_Offset);
-    }
-
-    private void getLayoutManager (RecyclerView recyclerView) {
-        LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        RecyclerView_notes_firstItem = manager != null ? manager.findFirstVisibleItemPosition() : 0;
-        View firstItemView = manager != null ? manager.findViewByPosition(RecyclerView_notes_firstItem) : null;
-        RecyclerView_notes_Offset = firstItemView != null ? firstItemView.getTop() : 0;
     }
 
     private void setLayoutManager (RecyclerView recyclerView) {
-        LinearLayoutManager layoutManager;
-        layoutManager = new LinearLayoutManager(context);
-        layoutManager.scrollToPositionWithOffset(RecyclerView_notes_firstItem, (int) RecyclerView_notes_Offset);
+        UIManager.FullyLinearLayoutManager layoutManager;
+        layoutManager = new UIManager.FullyLinearLayoutManager(context);
+        layoutManager.setmCanVerticalScroll(false);
         layoutManager.setOrientation(RecyclerView.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                Log.d(TAG, "onGlobalLayout: " + recyclerView.getItemDecorationCount());
-                //if (recyclerView.getItemDecorationCount())
-                //View Item = recyclerView.getLayoutManager().findViewByPosition(0);
+                if (!(Objects.requireNonNull(recyclerView.getAdapter()).getItemCount() > 0))
+                    return;
+                View Item = Objects.requireNonNull(recyclerView.getLayoutManager()).findViewByPosition(0);
                 ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
-                params.height = recyclerView.getMeasuredHeight();
-                Log.d(TAG, "onGlobalLayout: " + recyclerView.getMeasuredHeight());
+                params.height = recyclerView.getAdapter().getItemCount() * (Item != null ? Item.getHeight() : 0);
                 recyclerView.setLayoutParams(params);
             }
         });
@@ -130,6 +121,7 @@ public class NoteFragment extends Fragment {
     private void init (View view){
         initViewPager(view);
         initRecyclerView(view);
+        initScrollView(view);
     }
 
     private void initViewPager (View view){
@@ -222,6 +214,10 @@ public class NoteFragment extends Fragment {
         }
         NoteKindAdapter adapter = new NoteKindAdapter(noteKinds, context);
         RecyclerView_notes.setAdapter(adapter);
+    }
+
+    private void initScrollView(View view) {
+        ScrollView_fragment_note = view.findViewById(R.id.ScrollView_fragment_note);
     }
 
     private void getTheViewPagerRoll () {
@@ -473,7 +469,7 @@ public class NoteFragment extends Fragment {
                     Log.d(TAG, "onScrollStateChanged: ");
                     LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
                     noteKind.setRecyclerView_notes_firstItem(manager != null ? manager.findFirstVisibleItemPosition() : 0);
-                    View firstItemView = manager != null ? manager.findViewByPosition(RecyclerView_notes_firstItem) : null;
+                    View firstItemView = manager != null ? manager.findViewByPosition(noteKind.getRecyclerView_notes_firstItem()) : null;
                     noteKind.setRecyclerView_notes_leftOffset(firstItemView != null ? firstItemView.getLeft() : 0);
                 }
             });

@@ -187,7 +187,7 @@ public class MainUI extends AppCompatActivity {
             }
         });
         DetailViewPager_MainUI.setCanCurrent(false);
-        DetailViewPager_MainUI.setCanSwipe(false);
+        DetailViewPager_MainUI.setCanSwipe(true);
     }
 
     private static class PagerAdapter extends FragmentPagerAdapter {

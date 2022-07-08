@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScrollView_fragment_note"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="wrap_content"
+    android:scrollbars="none">
 
     <LinearLayout
         android:orientation="vertical"
@@ -17,6 +18,7 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/RecyclerView_notekinds"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:overScrollMode="never" />
     </LinearLayout>
 </ScrollView>
