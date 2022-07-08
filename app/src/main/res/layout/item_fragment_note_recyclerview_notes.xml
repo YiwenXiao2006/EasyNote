@@ -1,58 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="168.75dp"
-    android:layout_height="225dp">
+    android:layout_height="225dp"
+    android:layout_margin="10dp">
 
-    <RelativeLayout
+    <com.XYW.easynote.ui.RoundImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp">
+        android:padding="5dp"
+        app:radius="5dp"
+        app:srcCompat="@color/lightbackground" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
         <com.XYW.easynote.ui.RoundImageView
+            android:id="@+id/RoundImageView_noteImg"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:padding="5dp"
-            app:radius="5dp"
-            app:srcCompat="@color/lightbackground" />
+            android:layout_height="0dp"
+            android:layout_margin="5dp"
+            android:layout_weight="1" />
 
-        <com.XYW.easynote.ui.RoundImageView
-            android:id="@+id/RoundImageView_noteBackground"
+        <TextView
+            android:id="@+id/TextView_noteTitle"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:srcCompat="@drawable/img_notes_recyclerview_background"
-            app:radius="5dp" />
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp"
+            android:textSize="15sp"
+            android:textColor="@color/text"
+            android:textStyle="bold" />
+    </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <com.XYW.easynote.ui.RoundImageView
-                android:id="@+id/RoundImageView_noteImg"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_margin="5dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/TextView_noteTitle"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:gravity="center_vertical"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:textSize="15sp"
-                android:textColor="@color/text"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <com.XYW.easynote.ui.RoundImageView
-            android:id="@+id/RoundImageView_noteIcon"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/shape_fragment_note_recyclerview_icon"
-            app:radius="5dp" />
-    </RelativeLayout>
-</LinearLayout>
+    <com.XYW.easynote.ui.RoundImageView
+        android:id="@+id/RoundImageView_noteIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@drawable/shape_fragment_note_recyclerview_icon"
+        app:radius="5dp" />
+</RelativeLayout>

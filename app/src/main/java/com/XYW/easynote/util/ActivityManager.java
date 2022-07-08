@@ -86,11 +86,13 @@ public class ActivityManager {
      * @param view 填补状态栏位置的View
      */
     public static void setStatusBar(Activity activity, View view) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {  // LOLLIPOP:21
             view.setVisibility(View.GONE);
-            Log.d(TAG, "setStatusBar: ");
+            Log.d(TAG, "setStatusBar: Can not do this, beacase SDK is " + Build.VERSION.SDK_INT + ", target SDK is " + Build.VERSION_CODES.LOLLIPOP);
             return;
         }
+
+        Log.d(TAG, "setStatusBar: OK, SDK:" + Build.VERSION.SDK_INT);
 
         Window window = activity.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);

@@ -3,7 +3,6 @@ package com.XYW.easynote.Fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -29,6 +29,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.DetailViewPager;
 import com.XYW.easynote.ui.RoundImageView;
+import com.XYW.easynote.util.UIManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,11 +48,13 @@ public class NoteFragment extends Fragment {
     private Activity activity;
 
     private int AllCount_viewpager = 0, CountNow_viewpager = 0;
-    private static int RecyclerView_notes_firstItem;
-    private static float RecyclerView_notes_leftOffset;
+    private static int SavedCount_viewpager, RecyclerView_notes_firstItem = 0;
+    private static float RecyclerView_notes_Offset;
     private boolean isMax_viewpager;
     private Timer Timer_viewpager = new Timer();
     private Handler.Callback Hander_viewpager;
+
+    private static List<NoteKind> noteKinds = new ArrayList<>();
 
     public NoteFragment() {
 
@@ -65,7 +68,7 @@ public class NoteFragment extends Fragment {
 
         if (savedInstanceState != null) {
             RecyclerView_notes_firstItem = savedInstanceState.getInt("ARGS_SCROLL_POS_NOTES");
-            RecyclerView_notes_leftOffset = savedInstanceState.getFloat("ARGS_SCROLL_OFFSET_NOTES");
+            RecyclerView_notes_Offset = savedInstanceState.getFloat("ARGS_SCROLL_OFFSET_NOTES");
         }
         init(view);
         return view;
@@ -74,6 +77,7 @@ public class NoteFragment extends Fragment {
     @Override
     public void onPause () {
         super.onPause();
+        SavedCount_viewpager = CountNow_viewpager;
         getLayoutManager(RecyclerView_notes);
     }
 
@@ -81,6 +85,10 @@ public class NoteFragment extends Fragment {
     public void onResume () {
         super.onResume();
         setLayoutManager(RecyclerView_notes);
+        if (ViewPager_templateNote != null) {
+            CountNow_viewpager = SavedCount_viewpager;
+            ViewPager_templateNote.setCurrentItem(SavedCount_viewpager);
+        }
     }
 
     @Override
@@ -88,22 +96,35 @@ public class NoteFragment extends Fragment {
         super.onSaveInstanceState(outState);
         getLayoutManager(RecyclerView_notes);
         outState.putInt("ARGS_SCROLL_POS_NOTES", RecyclerView_notes_firstItem);
-        outState.putFloat("ARGS_SCROLL_OFFSET_NOTES", RecyclerView_notes_leftOffset);
+        outState.putFloat("ARGS_SCROLL_OFFSET_NOTES", RecyclerView_notes_Offset);
     }
 
-    private void getLayoutManager (RecyclerView recyclerView){
+    private void getLayoutManager (RecyclerView recyclerView) {
         LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
         RecyclerView_notes_firstItem = manager != null ? manager.findFirstVisibleItemPosition() : 0;
         View firstItemView = manager != null ? manager.findViewByPosition(RecyclerView_notes_firstItem) : null;
-        RecyclerView_notes_leftOffset = firstItemView != null ? firstItemView.getLeft() : 0;
+        RecyclerView_notes_Offset = firstItemView != null ? firstItemView.getTop() : 0;
     }
 
-    private void setLayoutManager (RecyclerView recyclerView){
+    private void setLayoutManager (RecyclerView recyclerView) {
         LinearLayoutManager layoutManager;
-        layoutManager = recyclerView.getLayoutManager() == null ? new LinearLayoutManager(context) : (LinearLayoutManager) recyclerView.getLayoutManager();
-        layoutManager.scrollToPositionWithOffset(RecyclerView_notes_firstItem, (int) RecyclerView_notes_leftOffset);
-        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
+        layoutManager = new LinearLayoutManager(context);
+        layoutManager.scrollToPositionWithOffset(RecyclerView_notes_firstItem, (int) RecyclerView_notes_Offset);
+        layoutManager.setOrientation(RecyclerView.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                Log.d(TAG, "onGlobalLayout: " + recyclerView.getItemDecorationCount());
+                //if (recyclerView.getItemDecorationCount())
+                //View Item = recyclerView.getLayoutManager().findViewByPosition(0);
+                ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
+                params.height = recyclerView.getMeasuredHeight();
+                Log.d(TAG, "onGlobalLayout: " + recyclerView.getMeasuredHeight());
+                recyclerView.setLayoutParams(params);
+            }
+        });
     }
 
     private void init (View view){
@@ -173,7 +194,7 @@ public class NoteFragment extends Fragment {
     }
 
     private void initRecyclerView (View view){
-        RecyclerView_notes = view.findViewById(R.id.RecyclerView_notes);
+        RecyclerView_notes = view.findViewById(R.id.RecyclerView_notekinds);
         setLayoutManager(RecyclerView_notes);
 
         List<Note> notes = new ArrayList<>();
@@ -182,14 +203,25 @@ public class NoteFragment extends Fragment {
         notes.add(new Note(null, null, null, "test3"));
         notes.add(new Note(null, null, null, "test4"));
         notes.add(new Note(null, null, null, "test5"));
-        NoteAdapter adapter = new NoteAdapter(notes);
+
+        List<Integer> firstItem = new ArrayList<>();
+        List<Float> offset = new ArrayList<>();
+        for (int i = 0; i < noteKinds.size(); i++) {
+            firstItem.add(noteKinds.get(i).getRecyclerView_notes_firstItem());
+            offset.add(noteKinds.get(i).getRecyclerView_notes_leftOffset());
+        }
+        noteKinds.clear();
+        if (!firstItem.isEmpty()) {
+            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title), firstItem.get(0), offset.get(0)));
+            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title), firstItem.get(1), offset.get(1)));
+            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title), firstItem.get(2), offset.get(2)));
+        } else {
+            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title)));
+            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title)));
+            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title)));
+        }
+        NoteKindAdapter adapter = new NoteKindAdapter(noteKinds, context);
         RecyclerView_notes.setAdapter(adapter);
-        RecyclerView_notes.setOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-        });
     }
 
     private void getTheViewPagerRoll () {
@@ -229,6 +261,59 @@ public class NoteFragment extends Fragment {
     public void onAttach (@NonNull Context context){
         super.onAttach(context);
         this.context = context;
+    }
+
+    public static class NoteKind {
+
+        private int RecyclerView_notes_firstItem;
+        private float RecyclerView_notes_leftOffset;
+
+        private List<Note> notes;
+        private String title;
+
+        public NoteKind(List<Note> notes, String title) {
+            this.notes = notes;
+            this.title = title;
+        }
+
+        public NoteKind(List<Note> notes, String title, int RecyclerView_notes_firstItem, float RecyclerView_notes_leftOffset) {
+            this.notes = notes;
+            this.title = title;
+            this.RecyclerView_notes_firstItem = RecyclerView_notes_firstItem;
+            this.RecyclerView_notes_leftOffset = RecyclerView_notes_leftOffset;
+        }
+
+        public void setNotes(List<Note> notes) {
+            this.notes = notes;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public List<Note> getNotes() {
+            return notes;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setRecyclerView_notes_firstItem(int recyclerView_notes_firstItem) {
+            RecyclerView_notes_firstItem = recyclerView_notes_firstItem;
+        }
+
+        public void setRecyclerView_notes_leftOffset(float recyclerView_notes_leftOffset) {
+            RecyclerView_notes_leftOffset = recyclerView_notes_leftOffset;
+        }
+
+        public int getRecyclerView_notes_firstItem() {
+            return RecyclerView_notes_firstItem;
+        }
+
+        public float getRecyclerView_notes_leftOffset() {
+            return RecyclerView_notes_leftOffset;
+        }
     }
 
     public static class Note implements Parcelable {
@@ -339,53 +424,116 @@ public class NoteFragment extends Fragment {
         }
     }
 
-    private static class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
+    private static class NoteKindAdapter extends RecyclerView.Adapter<NoteKindAdapter.ViewHolder> {
 
-        private final List<Note> mNotes;
+        private final List<NoteKind> noteKinds;
+        private final Context context;
 
         static class ViewHolder extends RecyclerView.ViewHolder {
-
-            TextView TextView_noteTitle;
-            RoundImageView RoundImageView_noteIcon, RoundImageView_noteImg, RoundImageView_noteBackground;
+            RecyclerView RecyclerView_Notes;
+            TextView TextView_NoteKind;
 
             public ViewHolder(View view) {
                 super(view);
-                TextView_noteTitle = view.findViewById(R.id.TextView_noteTitle);
-                RoundImageView_noteIcon = view.findViewById(R.id.RoundImageView_noteIcon);
-                RoundImageView_noteImg = view.findViewById(R.id.RoundImageView_noteImg);
-                RoundImageView_noteBackground = view.findViewById(R.id.RoundImageView_noteBackground);
+                RecyclerView_Notes = view.findViewById(R.id.RecyclerView_notes);
+                TextView_NoteKind = view.findViewById(R.id.TextView_noteKinds_title);
             }
         }
 
-        public NoteAdapter(List<Note> mNotes) {
-            this.mNotes = mNotes;
+        public NoteKindAdapter(List<NoteKind> noteKinds, Context context) {
+            this.noteKinds = noteKinds;
+            this.context = context;
         }
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.item_fragment_note_recyclerview_notes, parent, false);
+                    .inflate(R.layout.item_fragment_note_recyclerview_notekinds, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
-            Note note = mNotes.get(pos);
+        public void onBindViewHolder(NoteKindAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
+            NoteKind noteKind = noteKinds.get(pos);
             holder.setIsRecyclable(false);
-            holder.TextView_noteTitle.setText(note.getTitle());
-            if (note.getBackground_Path() != null)
-                holder.RoundImageView_noteImg.setImageBitmap(BitmapFactory.decodeFile(note.getBackground_Path()));
-            if (note.getIcon_Path() != null)
-                holder.RoundImageView_noteIcon.setImageBitmap(BitmapFactory.decodeFile(note.getIcon_Path()));
-            else
-                holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
-            holder.RoundImageView_noteBackground.setImageResource(R.drawable.img_notes_recyclerview_background);
+            holder.TextView_NoteKind.setText(noteKind.getTitle());
+            LinearLayoutManager layoutManager;
+            layoutManager = holder.RecyclerView_Notes.getLayoutManager() == null ? new LinearLayoutManager(context) : (LinearLayoutManager) holder.RecyclerView_Notes.getLayoutManager();
+            layoutManager.scrollToPositionWithOffset(noteKind.getRecyclerView_notes_firstItem(), (int) noteKind.getRecyclerView_notes_leftOffset());
+            layoutManager.setOrientation(RecyclerView.HORIZONTAL);
+            holder.RecyclerView_Notes.setLayoutManager(layoutManager);
+
+            NoteAdapter adapter = new NoteAdapter(noteKind.getNotes());
+            holder.RecyclerView_Notes.setAdapter(adapter);
+            holder.RecyclerView_Notes.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    Log.d(TAG, "onScrollStateChanged: ");
+                    LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    noteKind.setRecyclerView_notes_firstItem(manager != null ? manager.findFirstVisibleItemPosition() : 0);
+                    View firstItemView = manager != null ? manager.findViewByPosition(RecyclerView_notes_firstItem) : null;
+                    noteKind.setRecyclerView_notes_leftOffset(firstItemView != null ? firstItemView.getLeft() : 0);
+                }
+            });
         }
 
         @Override
         public int getItemCount() {
-            return this.mNotes.size();
+            return this.noteKinds.size();
+        }
+
+        private static class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
+
+            private final List<Note> mNotes;
+
+            static class ViewHolder extends RecyclerView.ViewHolder {
+
+                TextView TextView_noteTitle;
+                RoundImageView RoundImageView_noteIcon, RoundImageView_noteImg;
+
+                public ViewHolder(View view) {
+                    super(view);
+                    TextView_noteTitle = view.findViewById(R.id.TextView_noteTitle);
+                    RoundImageView_noteIcon = view.findViewById(R.id.RoundImageView_noteIcon);
+                    RoundImageView_noteImg = view.findViewById(R.id.RoundImageView_noteImg);
+                }
+            }
+
+            public NoteAdapter(List<Note> mNotes) {
+                this.mNotes = mNotes;
+            }
+
+            @NonNull
+            @Override
+            public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.item_fragment_note_recyclerview_notes, parent, false);
+                return new ViewHolder(view);
+            }
+
+            @Override
+            public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
+                Note note = mNotes.get(pos);
+                holder.setIsRecyclable(false);
+                holder.TextView_noteTitle.setText(note.getTitle());
+                if (note.getBackground_Path() != null) {
+                    holder.RoundImageView_noteImg.setImageBitmap(BitmapFactory.decodeFile(note.getBackground_Path()));
+                } else {
+                    holder.RoundImageView_noteImg.setImageResource(R.drawable.img_note_defult_cover);
+                }
+                if (note.getIcon_Path() != null) {
+                    holder.RoundImageView_noteIcon.setImageBitmap(BitmapFactory.decodeFile(note.getIcon_Path()));
+                } else {
+                    holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
+                }
+            }
+
+            @Override
+            public int getItemCount() {
+                return this.mNotes.size();
+            }
         }
     }
 
