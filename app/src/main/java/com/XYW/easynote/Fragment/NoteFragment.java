@@ -3,11 +3,13 @@ package com.XYW.easynote.Fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +47,8 @@ public class NoteFragment extends Fragment {
     private Activity activity;
 
     private int AllCount_viewpager = 0, CountNow_viewpager = 0;
+    private static int RecyclerView_notes_firstItem;
+    private static float RecyclerView_notes_leftOffset;
     private boolean isMax_viewpager;
     private Timer Timer_viewpager = new Timer();
     private Handler.Callback Hander_viewpager;
@@ -59,16 +63,55 @@ public class NoteFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         this.container = container;
 
+        if (savedInstanceState != null) {
+            RecyclerView_notes_firstItem = savedInstanceState.getInt("ARGS_SCROLL_POS_NOTES");
+            RecyclerView_notes_leftOffset = savedInstanceState.getFloat("ARGS_SCROLL_OFFSET_NOTES");
+        }
         init(view);
         return view;
     }
 
-    private void init(View view) {
+    @Override
+    public void onPause () {
+        super.onPause();
+        getLayoutManager(RecyclerView_notes);
+    }
+
+    @Override
+    public void onResume () {
+        super.onResume();
+        setLayoutManager(RecyclerView_notes);
+    }
+
+    @Override
+    public void onSaveInstanceState (@NonNull Bundle outState){
+        super.onSaveInstanceState(outState);
+        getLayoutManager(RecyclerView_notes);
+        outState.putInt("ARGS_SCROLL_POS_NOTES", RecyclerView_notes_firstItem);
+        outState.putFloat("ARGS_SCROLL_OFFSET_NOTES", RecyclerView_notes_leftOffset);
+    }
+
+    private void getLayoutManager (RecyclerView recyclerView){
+        LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
+        RecyclerView_notes_firstItem = manager != null ? manager.findFirstVisibleItemPosition() : 0;
+        View firstItemView = manager != null ? manager.findViewByPosition(RecyclerView_notes_firstItem) : null;
+        RecyclerView_notes_leftOffset = firstItemView != null ? firstItemView.getLeft() : 0;
+    }
+
+    private void setLayoutManager (RecyclerView recyclerView){
+        LinearLayoutManager layoutManager;
+        layoutManager = recyclerView.getLayoutManager() == null ? new LinearLayoutManager(context) : (LinearLayoutManager) recyclerView.getLayoutManager();
+        layoutManager.scrollToPositionWithOffset(RecyclerView_notes_firstItem, (int) RecyclerView_notes_leftOffset);
+        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
+        recyclerView.setLayoutManager(layoutManager);
+    }
+
+    private void init (View view){
         initViewPager(view);
         initRecyclerView(view);
     }
 
-    private void initViewPager(View view) {
+    private void initViewPager (View view){
         ViewPager_templateNote = view.findViewById(R.id.ViewPager_templateNote);
         int[] drawables = new int[]{R.drawable.shape_gradient_red, R.drawable.shape_gradient_lemon},
                 img = new int[]{R.drawable.img_note_template_gift, R.drawable.img_note_template_leaves},
@@ -81,9 +124,9 @@ public class NoteFragment extends Fragment {
             View templateLayout = LayoutInflater.from(context).inflate(R.layout.content_template, container, false);
             RelativeLayout relativeLayout = templateLayout.findViewById(R.id.RelativeLayout_template_background);
             ImageView Img = templateLayout.findViewById(R.id.ImageView_template_Img),
-                        subImg = templateLayout.findViewById(R.id.ImageView_template_subImg);
+                    subImg = templateLayout.findViewById(R.id.ImageView_template_subImg);
             TextView Title = templateLayout.findViewById(R.id.TextView_template_title),
-                        subTitle = templateLayout.findViewById(R.id.TextView_template_subtitle);
+                    subTitle = templateLayout.findViewById(R.id.TextView_template_subtitle);
             relativeLayout.setBackground(ContextCompat.getDrawable(activity, drawables[i]));
             Img.setImageResource(img[i]);
             subImg.setImageResource(subimg[i]);
@@ -129,11 +172,9 @@ public class NoteFragment extends Fragment {
         });
     }
 
-    private void initRecyclerView(View view) {
+    private void initRecyclerView (View view){
         RecyclerView_notes = view.findViewById(R.id.RecyclerView_notes);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(context);
-        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
-        RecyclerView_notes.setLayoutManager(layoutManager);
+        setLayoutManager(RecyclerView_notes);
 
         List<Note> notes = new ArrayList<>();
         notes.add(new Note(null, null, null, "test"));
@@ -143,9 +184,15 @@ public class NoteFragment extends Fragment {
         notes.add(new Note(null, null, null, "test5"));
         NoteAdapter adapter = new NoteAdapter(notes);
         RecyclerView_notes.setAdapter(adapter);
+        RecyclerView_notes.setOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+        });
     }
 
-    private void getTheViewPagerRoll() {
+    private void getTheViewPagerRoll () {
         TimerTask timerTask_Viewpager = new TimerTask() {
             @Override
             public void run() {
@@ -169,7 +216,7 @@ public class NoteFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(@NonNull Activity activity) {
+    public void onAttach (@NonNull Activity activity){
         super.onAttach(activity);
         this.activity = activity;
         Hander_viewpager = message -> {
@@ -179,7 +226,7 @@ public class NoteFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach (@NonNull Context context){
         super.onAttach(context);
         this.context = context;
     }
@@ -299,13 +346,14 @@ public class NoteFragment extends Fragment {
         static class ViewHolder extends RecyclerView.ViewHolder {
 
             TextView TextView_noteTitle;
-            RoundImageView RoundImageView_noteIcon, RoundImageView_noteImg;
+            RoundImageView RoundImageView_noteIcon, RoundImageView_noteImg, RoundImageView_noteBackground;
 
             public ViewHolder(View view) {
                 super(view);
                 TextView_noteTitle = view.findViewById(R.id.TextView_noteTitle);
                 RoundImageView_noteIcon = view.findViewById(R.id.RoundImageView_noteIcon);
                 RoundImageView_noteImg = view.findViewById(R.id.RoundImageView_noteImg);
+                RoundImageView_noteBackground = view.findViewById(R.id.RoundImageView_noteBackground);
             }
         }
 
@@ -315,14 +363,14 @@ public class NoteFragment extends Fragment {
 
         @NonNull
         @Override
-        public NoteAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext())
                     .inflate(R.layout.item_fragment_note_recyclerview_notes, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(NoteAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
+        public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
             Note note = mNotes.get(pos);
             holder.setIsRecyclable(false);
             holder.TextView_noteTitle.setText(note.getTitle());
@@ -330,6 +378,9 @@ public class NoteFragment extends Fragment {
                 holder.RoundImageView_noteImg.setImageBitmap(BitmapFactory.decodeFile(note.getBackground_Path()));
             if (note.getIcon_Path() != null)
                 holder.RoundImageView_noteIcon.setImageBitmap(BitmapFactory.decodeFile(note.getIcon_Path()));
+            else
+                holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
+            holder.RoundImageView_noteBackground.setImageResource(R.drawable.img_notes_recyclerview_background);
         }
 
         @Override
@@ -372,6 +423,7 @@ public class NoteFragment extends Fragment {
     public static class ZoomOutPageTransformer implements ViewPager.PageTransformer {
         private static final float MIN_SCALE = 0.85f;
         private static final float MIN_ALPHA = 0.5f;
+
         @Override
         public void transformPage(View view, float position) {
             int pageWidth = view.getWidth();

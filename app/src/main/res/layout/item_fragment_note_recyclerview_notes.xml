@@ -13,10 +13,12 @@
         <com.XYW.easynote.ui.RoundImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="5dp"
             app:radius="5dp"
             app:srcCompat="@color/lightbackground" />
 
         <com.XYW.easynote.ui.RoundImageView
+            android:id="@+id/RoundImageView_noteBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:srcCompat="@drawable/img_notes_recyclerview_background"

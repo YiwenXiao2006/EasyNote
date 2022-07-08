@@ -13,8 +13,14 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@drawable/img_notes_recyclerview_background">
+            android:layout_height="match_parent">
+
+            <com.XYW.easynote.ui.RoundImageView
+                android:id="@+id/RoundImageView_noteBackground"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:srcCompat="@drawable/img_notes_recyclerview_background"
+                app:radius="5dp" />
 
             <LinearLayout
                 android:orientation="vertical"
@@ -25,6 +31,7 @@
                     android:id="@+id/RoundImageView_noteImg"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
+                    android:padding="5dp"
                     android:layout_margin="5dp"
                     android:layout_weight="1" />
 
