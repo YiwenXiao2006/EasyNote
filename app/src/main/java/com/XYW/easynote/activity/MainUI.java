@@ -1,18 +1,16 @@
 package com.XYW.easynote.activity;
 
-import static com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_LABELED;
-import static com.google.android.material.bottomnavigation.LabelVisibilityMode.LABEL_VISIBILITY_SELECTED;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.view.menu.MenuPopupHelper;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
@@ -22,6 +20,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -30,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.XYW.easynote.Fragment.NoteFragment;
@@ -39,10 +39,14 @@ import com.XYW.easynote.ui.DetailViewPager;
 import com.XYW.easynote.util.ActivityManager;
 import com.XYW.easynote.util.WindowManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.suke.widget.SwitchButton;
 
-public class MainUI extends AppCompatActivity {
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     private static final String TAG = "MainUI";
 
@@ -50,6 +54,7 @@ public class MainUI extends AppCompatActivity {
     private DrawerLayout DrawerLayout_MainUI;
     private BottomNavigationView BottomNavigationView_MainUI;
     private DetailViewPager DetailViewPager_MainUI;
+    private PopupMenu PopoMenu_MainUI;
 
     private SharedPreferences.Editor editor;
     private boolean darkMode = false, drawerOpen = false;
@@ -71,6 +76,13 @@ public class MainUI extends AppCompatActivity {
         }
 
         init();
+    }
+
+    @Override
+    public boolean onMenuItemClick(MenuItem menuItem) {
+        switch (menuItem.getItemId()){
+        }
+        return false;
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -120,7 +132,7 @@ public class MainUI extends AppCompatActivity {
         setSupportActionBar(toolbar_MainUI);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
-            actionBar.setTitle("");
+            actionBar.setDisplayShowTitleEnabled(false);
         }
     }
 
@@ -129,16 +141,39 @@ public class MainUI extends AppCompatActivity {
         TextView_toolbarTitle.setText(getString(R.string.title_note));
     }
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    @SuppressLint("RestrictedApi")
     private void initImageButton() {
-        ImageButton imageButton_toolbarHomeButton = findViewById(R.id.ImageButton_toolbarHomeButton);
-        imageButton_toolbarHomeButton.setImageDrawable(getResources().getDrawable(R.drawable.general_menu));
+        ImageButton imageButton_toolbarHomeButton = findViewById(R.id.ImageButton_toolbarHomeButton),
+                    imageButton_toolbarDoneButton = findViewById(R.id.ImageButton_toolbarDoneButton);
+        imageButton_toolbarHomeButton.setImageDrawable(ContextCompat.getDrawable(MainUI.this, R.drawable.general_menu));
         imageButton_toolbarHomeButton.setVisibility(View.VISIBLE);
         imageButton_toolbarHomeButton.setOnClickListener(view -> {
             if (!DrawerLayout_MainUI.isOpen()) {
                 DrawerLayout_MainUI.open();
             }
         });
+
+        imageButton_toolbarDoneButton.setImageDrawable(ContextCompat.getDrawable(MainUI.this, R.drawable.interactive_more_vertical));
+        imageButton_toolbarDoneButton.setVisibility(View.VISIBLE);
+        imageButton_toolbarDoneButton.setOnClickListener(view -> {
+            initPopupMenu(R.menu.menu_mainui_note, view);
+        });
+    }
+
+    @SuppressLint("RestrictedApi")
+    private void initPopupMenu(int menu, View view) {
+        PopoMenu_MainUI = new PopupMenu(this, view);
+        PopoMenu_MainUI.inflate(menu);  //创建弹出式菜单
+        PopoMenu_MainUI.setOnMenuItemClickListener(this);  //将自制的弹出布局绑定菜单
+        try {
+            @SuppressLint("PrivateApi") Class<?> aClass = Class.forName("com.android.internal.view.menu.MenuBuilder");
+            @SuppressLint("DiscouragedPrivateApi") Method m = aClass.getDeclaredMethod("setOptionalIconsVisible", boolean.class);
+            m.setAccessible(true);
+            m.invoke(PopoMenu_MainUI.getMenu(), true); //传入参数
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        PopoMenu_MainUI.show();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -160,9 +195,9 @@ public class MainUI extends AppCompatActivity {
         });
 
         if (WindowManager.isScreenChange(this)) {
-            BottomNavigationView_MainUI.setLabelVisibilityMode(LABEL_VISIBILITY_SELECTED);
+            BottomNavigationView_MainUI.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_SELECTED);
         } else {
-            BottomNavigationView_MainUI.setLabelVisibilityMode(LABEL_VISIBILITY_LABELED);
+            BottomNavigationView_MainUI.setLabelVisibilityMode(NavigationBarView.LABEL_VISIBILITY_LABELED);
         }
     }
 

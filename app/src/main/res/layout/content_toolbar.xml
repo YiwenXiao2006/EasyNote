@@ -17,6 +17,7 @@
         android:scaleType="centerCrop"
         android:src="@drawable/direction_left"
         android:visibility="gone"
+        android:tint="@color/white"
         tools:src="@drawable/direction_left" />
 
     <TextView
@@ -32,11 +33,12 @@
         android:layout_width="25dp"
         android:layout_height="25dp"
         android:layout_gravity="center|end"
-        android:layout_marginRight="17dp"
-        android:layout_marginEnd="17dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/ic_buttonpress"
         android:scaleType="centerCrop"
         android:src="@drawable/tips_check"
         android:visibility="gone"
+        android:tint="@color/white"
         tools:src="@drawable/tips_check" />
 </androidx.appcompat.widget.Toolbar>

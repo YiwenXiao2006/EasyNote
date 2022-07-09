@@ -60,10 +60,6 @@ public class UIManager {
             super(context);
         }
 
-        public FullyLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
-            super(context, orientation, reverseLayout);
-        }
-
         private final int[] mMeasuredDimension = new int[2];
         private boolean mCanVerticalScroll = true;
 
