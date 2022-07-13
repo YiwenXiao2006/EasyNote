@@ -4,13 +4,19 @@
     <group android:id="@+id/group_control">
         <item
             android:id="@+id/navigation_settings"
-            android:title="@string/title_settings"
+            android:title="@string/title_nav_settings"
             android:icon="@drawable/interactive_settings" />
 
         <item
             android:id="@+id/navigation_darkmode"
-            android:title="@string/title_darkmode"
+            android:title="@string/title_nav_darkmode"
             android:icon="@drawable/general_moon"
             app:actionLayout="@layout/item_nav_switch"/>
+    </group>
+    <group android:id="@+id/function">
+        <item
+            android:id="@+id/navigation_exit"
+            android:title="@string/title_nav_exit"
+            android:icon="@drawable/interactive_import" />
     </group>
 </menu>

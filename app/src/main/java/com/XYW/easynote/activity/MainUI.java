@@ -1,26 +1,14 @@
 package com.XYW.easynote.activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.view.menu.MenuPopupHelper;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.ViewPager;
-
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.UiModeManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -29,24 +17,41 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.PopupMenu;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.ListPopupWindow;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.XYW.easynote.Fragment.NoteFragment;
 import com.XYW.easynote.Fragment.TodoFragment;
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.DetailViewPager;
+import com.XYW.easynote.ui.MessageBox;
+import com.XYW.easynote.ui.adapter.ListPopupItem;
+import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
 import com.XYW.easynote.util.ActivityManager;
+import com.XYW.easynote.util.PermissionManager;
 import com.XYW.easynote.util.WindowManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import com.google.android.material.navigation.NavigationView;
 import com.suke.widget.SwitchButton;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
-public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
+public class MainUI extends AppCompatActivity {
 
     private static final String TAG = "MainUI";
 
@@ -54,8 +59,9 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
     private DrawerLayout DrawerLayout_MainUI;
     private BottomNavigationView BottomNavigationView_MainUI;
     private DetailViewPager DetailViewPager_MainUI;
-    private PopupMenu PopoMenu_MainUI;
+    private ListPopupWindow ListPopupWindow_MainUI_menu;
 
+    private PermissionManager permissionManager;
     private SharedPreferences.Editor editor;
     private boolean darkMode = false, drawerOpen = false;
     private int system_ui_mode = UiModeManager.MODE_NIGHT_NO;
@@ -76,13 +82,6 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         }
 
         init();
-    }
-
-    @Override
-    public boolean onMenuItemClick(MenuItem menuItem) {
-        switch (menuItem.getItemId()){
-        }
-        return false;
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -112,12 +111,44 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (ListPopupWindow_MainUI_menu != null) {
+            ListPopupWindow_MainUI_menu.dismiss();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         ActivityManager.removeActivity(this);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PermissionManager.PERMISSION_REQUEST) {
+            if (!permissionManager.checkPermission()) {
+                permissionManager.onResult(grantResults, permissions, getString(R.string.message_permission_denied_storage_2),
+                        getString(R.string.message_permission_denied_storage_1), ActivityManager::finishAllActivity);
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 2) {
+            permissionManager.checkPermissionWithRequest();
+        }
+    }
+
     private void init() {
+        permissionManager = new PermissionManager(this, this, new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE});
+        permissionManager.checkPermissionWithRequest();
+
         initDrawerLayout();
         initNavigationView();
         initToolbar();
@@ -141,7 +172,7 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         TextView_toolbarTitle.setText(getString(R.string.title_note));
     }
 
-    @SuppressLint("RestrictedApi")
+    @SuppressLint({"RestrictedApi", "NonConstantResourceId"})
     private void initImageButton() {
         ImageButton imageButton_toolbarHomeButton = findViewById(R.id.ImageButton_toolbarHomeButton),
                     imageButton_toolbarDoneButton = findViewById(R.id.ImageButton_toolbarDoneButton);
@@ -156,24 +187,54 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         imageButton_toolbarDoneButton.setImageDrawable(ContextCompat.getDrawable(MainUI.this, R.drawable.interactive_more_vertical));
         imageButton_toolbarDoneButton.setVisibility(View.VISIBLE);
         imageButton_toolbarDoneButton.setOnClickListener(view -> {
-            initPopupMenu(R.menu.menu_mainui_note, view);
+            List<ListPopupItem> listPopupItems = new ArrayList<>();
+            switch (BottomNavigationView_MainUI.getSelectedItemId()) {
+                case R.id.navigation_note:
+                    listPopupItems.add(new ListPopupItem(getString(R.string.title_menu_recently), R.drawable.interactive_history));
+                    listPopupItems.add(new ListPopupItem(getString(R.string.title_menu_newnote), R.drawable.general_file));
+                    listPopupItems.add(new ListPopupItem(getString(R.string.title_menu_tags), R.drawable.general_tags));
+                    break;
+                case R.id.navigation_todo:
+                    break;
+            }
+            showListMenu(view, listPopupItems);
         });
     }
 
-    @SuppressLint("RestrictedApi")
-    private void initPopupMenu(int menu, View view) {
-        PopoMenu_MainUI = new PopupMenu(this, view);
-        PopoMenu_MainUI.inflate(menu);  //创建弹出式菜单
-        PopoMenu_MainUI.setOnMenuItemClickListener(this);  //将自制的弹出布局绑定菜单
-        try {
-            @SuppressLint("PrivateApi") Class<?> aClass = Class.forName("com.android.internal.view.menu.MenuBuilder");
-            @SuppressLint("DiscouragedPrivateApi") Method m = aClass.getDeclaredMethod("setOptionalIconsVisible", boolean.class);
-            m.setAccessible(true);
-            m.invoke(PopoMenu_MainUI.getMenu(), true); //传入参数
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        PopoMenu_MainUI.show();
+    private ListPopupWindow createListPopupWindow(View anchor, List<ListPopupItem> items) {
+        final ListPopupWindow popup = new ListPopupWindow(this);
+        ListPopupWindowAdapter adapter = new ListPopupWindowAdapter(items);
+        popup.setAnchorView(anchor);
+        popup.setWidth(getResources().getDimensionPixelSize(R.dimen.popupmenu_width));
+        popup.setAdapter(adapter);
+        return popup;
+    }
+
+    // Call this when you want to show the ListPopupWindow
+    @SuppressLint("NonConstantResourceId")
+    private void showListMenu(View anchor, List<ListPopupItem> listPopupItems) {
+        ListPopupWindow_MainUI_menu = createListPopupWindow(anchor, listPopupItems);
+        ListPopupWindow_MainUI_menu.setOnItemClickListener((adapterView, view, i, l) -> {
+            switch (BottomNavigationView_MainUI.getSelectedItemId()) {
+                case R.id.navigation_note:
+                    switch (i) {
+                        case 0:
+                            WindowManager.showToast(MainUI.this, getString(R.string.title_menu_recently));
+                            break;
+                        case 1:
+                            Intent intent = new Intent(MainUI.this, CreateFile.class);
+                            startActivity(intent);
+                            break;
+                        case 2:WindowManager.showToast(MainUI.this, getString(R.string.title_menu_tags));
+                            break;
+                    }
+                    ListPopupWindow_MainUI_menu.dismiss();
+                    break;
+                case R.id.navigation_todo:
+                    break;
+            }
+        }); // the callback for when a list item is selected
+        ListPopupWindow_MainUI_menu.show();
     }
 
     @SuppressLint("NonConstantResourceId")
@@ -244,7 +305,7 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            switch(position) {
+            switch (position) {
                 case 0:
                     return noteFragment;
                 default:
@@ -253,7 +314,7 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         }
 
         int getTitle(int position) {
-            switch(position) {
+            switch (position) {
                 case 0:
                     return R.string.title_note;
                 default:
@@ -323,11 +384,22 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         navigationView_drawerlayout.setNavigationItemSelectedListener(item1 -> {
             switch (item1.getItemId()) {
                 case R.id.navigation_settings:
-                    WindowManager.showToast(MainUI.this, getString(R.string.title_settings));
+                    WindowManager.showToast(MainUI.this, getString(R.string.title_nav_settings));
                     break;
                 case R.id.navigation_darkmode:
                     switchButton_darkMode.setChecked(!switchButton_darkMode.isChecked());
                     break;
+                case R.id.navigation_exit:
+                    new MessageBox.CreateMessageBox.Builder(MainUI.this)
+                            .setTitle(getString(R.string.title_nav_exit))
+                            .setMessage(getString(R.string.message_exit))
+                            .setCancelable(true)
+                            .setCanceledOnTouchOutside(true)
+                            .setPositiveButton(getString(R.string.text_button_positive_defult), this::finish)
+                            .setNegativeButton(getString(R.string.text_button_negative_defult), null)
+                            .create()
+                            .show();
+                break;
                 default:
                     break;
             }
@@ -337,6 +409,9 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             View_nav_status_bar.setVisibility(View.GONE);
         } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode()) {
+                View_nav_status_bar.setVisibility(View.GONE);
+            }
             ViewGroup.LayoutParams params = View_nav_status_bar.getLayoutParams();
             params.height = WindowManager.getStatusBarHeight(this, this);
             View_nav_status_bar.setLayoutParams(params);
@@ -357,7 +432,7 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
 
             @Override
             public void onDrawerOpened(@NonNull View drawerView) {
-                WindowManager.setWhiteStatusBar(window);
+                WindowManager.setWhiteStatusBar(window, Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP);
                 drawerOpen = true;
             }
 
@@ -373,7 +448,7 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
             }
         });
         if (drawerOpen) {
-            WindowManager.setWhiteStatusBar(window);
+            WindowManager.setWhiteStatusBar(window, Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP);
             DrawerLayout_MainUI.open();
         } else {
             DrawerClosed(window);
@@ -383,9 +458,9 @@ public class MainUI extends AppCompatActivity implements PopupMenu.OnMenuItemCli
 
     private void DrawerClosed(Window window) {
         if ((getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
-            WindowManager.setWhiteStatusBar(window);
+            WindowManager.setWhiteStatusBar(window, Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP);
         } else {
-            WindowManager.setBlackStatusBar(window);
+            WindowManager.setBlackStatusBar(window, Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP);
         }
     }
 }

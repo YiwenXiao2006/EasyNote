@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.percentlayout.widget.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="15dp"
+    android:layout_marginTop="5dp"
+    android:layout_marginRight="15dp"
+    android:layout_marginBottom="5dp">
+
+    <ImageView
+        android:id="@+id/ImageView_createExamSubject"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/image_transparent_background"
+        android:scaleType="fitCenter"
+        app:layout_aspectRatio="325%"
+        app:layout_widthPercent="100%"
+        app:radius="5dp"
+        app:srcCompat="@drawable/img_note_defult_cover" />
+</androidx.percentlayout.widget.PercentRelativeLayout>

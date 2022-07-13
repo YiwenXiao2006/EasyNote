@@ -1,14 +1,24 @@
 package com.XYW.easynote.util;
 
+import static android.content.Context.UI_MODE_SERVICE;
+
 import android.app.Activity;
+import android.app.UiModeManager;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Build;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,10 +81,10 @@ public class ActivityManager {
         //浅色模式的值为:0x11 com.XYW.easynote.util.WindowManager.getUIMode(activity) == 0x11
         if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
             //恢复状态栏白色字体
-            com.XYW.easynote.util.WindowManager.setWhiteStatusBar(window);
+            com.XYW.easynote.util.WindowManager.setWhiteStatusBar(window, true);
         } else if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
             //设置状态栏黑色字体
-            com.XYW.easynote.util.WindowManager.setBlackStatusBar(window);
+            com.XYW.easynote.util.WindowManager.setBlackStatusBar(window, true);
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.TRANSPARENT);
@@ -88,11 +98,8 @@ public class ActivityManager {
     public static void setStatusBar(Activity activity, View view) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {  // LOLLIPOP:21
             view.setVisibility(View.GONE);
-            Log.d(TAG, "setStatusBar: Can not do this, beacase SDK is " + Build.VERSION.SDK_INT + ", target SDK is " + Build.VERSION_CODES.LOLLIPOP);
             return;
         }
-
-        Log.d(TAG, "setStatusBar: OK, SDK:" + Build.VERSION.SDK_INT);
 
         Window window = activity.getWindow();
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -100,14 +107,10 @@ public class ActivityManager {
         //浅色模式的值为:0x11
         if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
             //恢复状态栏白色字体
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            com.XYW.easynote.util.WindowManager.setWhiteStatusBar(window, true);
         } else if ((activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO) {
             //设置状态栏黑色字体
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            } else {
-                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            }
+            com.XYW.easynote.util.WindowManager.setBlackStatusBar(window, true);
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(Color.TRANSPARENT);
@@ -115,5 +118,67 @@ public class ActivityManager {
         ViewGroup.LayoutParams params = view.getLayoutParams();
         params.height = com.XYW.easynote.util.WindowManager.getStatusBarHeight(activity.getBaseContext(), activity);
         view.setLayoutParams(params);
+    }
+
+    public static void setDarkMode(Activity activity) {
+        UiModeManager uiModeManager = (UiModeManager) activity.getSystemService(UI_MODE_SERVICE);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1 || uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_YES) {
+            return;
+        }
+        SharedPreferences preferences = activity.getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+        boolean darkMode = preferences.getBoolean("darkMode", false);
+        if (darkMode && (activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) != Configuration.UI_MODE_NIGHT_YES) {
+            ((AppCompatActivity) activity).getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            activity.recreate();
+        } else if (!darkMode && (activity.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES) {
+            ((AppCompatActivity) activity).getDelegate().setLocalNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+            activity.recreate();
+        }
+    }
+
+    /*
+     * 获取本地软件版本号
+     */
+    public static String getAppVersionName(Context context) {
+        String versionName = "";
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            versionName = packageInfo.versionName;
+            if (TextUtils.isEmpty(versionName)) {
+                return "";
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return versionName;
+    }
+
+    public static int getAppVersionCode(Context context) {
+        int versionCode = 0;
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(context.getPackageName(), 0);
+            versionCode = packageInfo.versionCode;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return versionCode;
+    }
+
+    /**
+     * 获取应用程序名称
+     */
+    public static String getAppName(Context context) {
+        try {
+            PackageManager packageManager = context.getPackageManager();
+            PackageInfo packageInfo = packageManager.getPackageInfo(
+                    context.getPackageName(), 0);
+            int labelRes = packageInfo.applicationInfo.labelRes;
+            return context.getResources().getString(labelRes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

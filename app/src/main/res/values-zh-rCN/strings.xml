@@ -4,13 +4,41 @@
 
     <string name="title_note">笔记</string>
     <string name="title_todo">待办事项</string>
-    <string name="title_settings">设置</string>
-    <string name="title_darkmode">深色模式</string>
+    <string name="title_newfile">新建文件</string>
+    <string name="title_nav_settings">设置</string>
+    <string name="title_nav_darkmode">深色模式</string>
+    <string name="title_nav_exit">退出</string>
     <string name="title_menu_recently">最近</string>
     <string name="title_menu_newnote">新建笔记</string>
+    <string name="title_menu_tags">分类</string>
+    <string name="title_messagebox_permission_denied">权限被拒绝</string>
+    <string name="title_messagebox_selectcover">选取封面</string>
     <string name="text_fragment_note_template_holiday_title">开始一个笔记!</string>
     <string name="text_fragment_note_template_holiday_subtitle">节日</string>
     <string name="text_fragment_note_template_summer_title">记录生活!</string>
     <string name="text_fragment_note_template_summer_subtitle">夏季</string>
     <string name="text_fragment_note_mynotes_title">我的笔记</string>
+    <string name="text_activity_createfile_theme">标题</string>
+    <string name="text_activity_createfile_describe">描述</string>
+    <string name="text_activity_createfile_cover">设置封面</string>
+    <string name="text_activity_createfile_chooseimg">选择图片</string>
+    <string name="text_activity_createfile_clear">清除</string>
+    <string name="text_button_positive_defult">确定</string>
+    <string name="text_button_negative_defult">取消</string>
+    <string name="text_button_positive_allow_1">同意</string>
+    <string name="text_button_positive_allow_2">前往设置</string>
+    <string name="text_button_negative_deny">拒绝</string>
+    <string name="text_button_positive_camera">拍摄</string>
+    <string name="text_button_negative_album">相册</string>
+    <string name="text_util_not_allowed_characters">不允许的字符：</string>
+    <string name="text_util_cannot_input_more_1">不能输入超过</string>
+    <string name="text_util_cannot_input_more_2">个字符</string>
+    <string name="message_exit">确定要退出吗？</string>
+    <string name="message_selectcover">选择一个方式来选取封面</string>
+    <string name="message_clearcover">是否清除封面？</string>
+    <string name="message_permission_denied_storage_1">禁止读写权限将导致数据无法正常保存，点击 \"同意\" 才可以使用哦！</string>
+    <string name="message_permission_denied_storage_2">禁止读写权限将导致数据无法正常保存，您似乎选择了不再询问，您需要前往设置允许该权限</string>
+    <string name="message_permission_denied_camera_1">允许摄像头正常拍照，点击 \"同意\" 以启用摄像头</string>
+    <string name="message_permission_denied_camera_2">允许摄像头正常拍照，您似乎选择了不再询问，您需要前往设置允许该权限</string>
+
 </resources>

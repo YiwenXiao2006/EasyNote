@@ -3,6 +3,7 @@ package com.XYW.easynote.Fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +14,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -28,23 +31,28 @@ import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.XYW.easynote.R;
+import com.XYW.easynote.activity.CreateFile;
 import com.XYW.easynote.ui.DetailViewPager;
 import com.XYW.easynote.ui.RoundImageView;
+import com.XYW.easynote.util.IOManager;
 import com.XYW.easynote.util.UIManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class NoteFragment extends Fragment {
+public class NoteFragment extends Fragment implements UIManager.HideScrollListener {
 
     private static final String TAG = "NoteFragment";
 
     private DetailViewPager ViewPager_templateNote;
     private RecyclerView RecyclerView_notes;
     private ScrollView ScrollView_fragment_note;
+    private FloatingActionButton FAB_createNote;
 
     private ViewGroup container;
     private Context context;
@@ -56,7 +64,7 @@ public class NoteFragment extends Fragment {
     private Timer Timer_viewpager = new Timer();
     private Handler.Callback Hander_viewpager;
 
-    private static final List<NoteKind> noteKinds = new ArrayList<>();
+    private static List<NoteTag> NOTE_TAGS = new ArrayList<>();
 
     public NoteFragment() {
 
@@ -108,9 +116,12 @@ public class NoteFragment extends Fragment {
             @Override
             public void onGlobalLayout() {
                 recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                if (!(Objects.requireNonNull(recyclerView.getAdapter()).getItemCount() > 0))
+                if (recyclerView.getAdapter() == null ||recyclerView.getLayoutManager() == null) {
                     return;
-                View Item = Objects.requireNonNull(recyclerView.getLayoutManager()).findViewByPosition(0);
+                }
+                if (!(recyclerView.getAdapter().getItemCount() > 0))
+                    return;
+                View Item = recyclerView.getLayoutManager().findViewByPosition(0);
                 ViewGroup.LayoutParams params = recyclerView.getLayoutParams();
                 params.height = recyclerView.getAdapter().getItemCount() * (Item != null ? Item.getHeight() : 0);
                 recyclerView.setLayoutParams(params);
@@ -122,6 +133,7 @@ public class NoteFragment extends Fragment {
         initViewPager(view);
         initRecyclerView(view);
         initScrollView(view);
+        initFAB(view);
     }
 
     private void initViewPager (View view){
@@ -189,35 +201,130 @@ public class NoteFragment extends Fragment {
         RecyclerView_notes = view.findViewById(R.id.RecyclerView_notekinds);
         setLayoutManager(RecyclerView_notes);
 
-        List<Note> notes = new ArrayList<>();
-        notes.add(new Note(null, null, null, "test"));
-        notes.add(new Note(null, null, null, "test2"));
-        notes.add(new Note(null, null, null, "test3"));
-        notes.add(new Note(null, null, null, "test4"));
-        notes.add(new Note(null, null, null, "test5"));
+        File Notes_Contents = new File(context.getFilesDir().getPath() + "/" + "Notes_Contents.ctt");
+        /*IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
+                "1\n" +
+                "<tag>\n" +
+                "TAG1\n" +
+                "<note>\n" +
+                "null\n" +
+                "null\n" +
+                "null\n" +
+                "test\n" +
+                "<endnote>\n" +
+                "<note>\n" +
+                "null\n" +
+                "null\n" +
+                "null\n" +
+                "test\n" +
+                "<endnote>\n" +
+                "<endtag>\n" +
+                "<tag>\n" +
+                "TAG2\n" +
+                "<note>\n" +
+                "null\n" +
+                "null\n" +
+                "null\n" +
+                "test\n" +
+                "<endnote>\n" +
+                "<note>\n" +
+                "null\n" +
+                "null\n" +
+                "null\n" +
+                "test\n" +
+                "<endnote>\n" +
+                "<note>\n" +
+                "null\n" +
+                "null\n" +
+                "null\n" +
+                "ENDNOTE\n" +
+                "<endnote>\n" +
+                "<endtag>", false);*/
+        if (!Notes_Contents.exists()) {
+            return;
+        }
+        List<String> notesContentsReader = IOManager.readFileByLine(Notes_Contents);
+        if (!Objects.equals(notesContentsReader.get(0), "#EasyNote")) {
+            return;
+        }
 
+        int mode = 0, //0:read Tag 1:read Note
+            offset_Pos = 0;
+        List<Note> notes = new ArrayList<>();
+        List<String> notereader = new ArrayList<>();
+        String tagTitle = "";
         List<Integer> firstItem = new ArrayList<>();
         List<Float> offset = new ArrayList<>();
-        for (int i = 0; i < noteKinds.size(); i++) {
-            firstItem.add(noteKinds.get(i).getRecyclerView_notes_firstItem());
-            offset.add(noteKinds.get(i).getRecyclerView_notes_leftOffset());
+        boolean endNote = true, endTag = true;
+
+        for (int i = 0; i < NOTE_TAGS.size(); i++) {
+            firstItem.add(NOTE_TAGS.get(i).getRecyclerView_notes_firstItem());
+            offset.add(NOTE_TAGS.get(i).getRecyclerView_notes_leftOffset());
         }
-        noteKinds.clear();
-        if (!firstItem.isEmpty()) {
-            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title), firstItem.get(0), offset.get(0)));
-            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title), firstItem.get(1), offset.get(1)));
-            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title), firstItem.get(2), offset.get(2)));
-        } else {
-            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title)));
-            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title)));
-            noteKinds.add(new NoteKind(notes, context.getResources().getString(R.string.text_fragment_note_mynotes_title)));
+
+        NOTE_TAGS = new ArrayList<>();
+
+        for (int i = 2; i < notesContentsReader.size(); i++) {
+            if (Objects.equals(notesContentsReader.get(i), "<tag>") && endTag && endNote) {
+                mode = 0;
+                tagTitle = "";
+                endTag = false;
+            } else if (Objects.equals(notesContentsReader.get(i), "<note>") && endNote) {
+                mode = 1;
+                endNote = false;
+            } else if (Objects.equals(notesContentsReader.get(i), "<endnote>")) {
+                if (notereader.size() < 1) {
+                    continue;
+                }
+                notes.add(new Note(Objects.equals(notereader.get(0), "null") ? null : notereader.get(0),
+                        Objects.equals(notereader.get(1), "null") ? null : notereader.get(1),
+                        Objects.equals(notereader.get(2), "null") ? null : notereader.get(2),
+                        notereader.get(3)));
+                endNote = true;
+                mode = -1;
+                notereader.clear();
+            } else if (Objects.equals(notesContentsReader.get(i), "<endtag>")) {
+                if (!firstItem.isEmpty()) {
+                    NOTE_TAGS.add(new NoteTag(notes, tagTitle, firstItem.get(offset_Pos), offset.get(offset_Pos)));
+                    offset_Pos ++;
+                    Log.d(TAG, "initRecyclerView: " + NOTE_TAGS.get(0).getNotes().size());
+                } else {
+                    NOTE_TAGS.add(new NoteTag(notes, tagTitle));
+                    Log.d(TAG, "initRecyclerView: firstItem.isEmpty()" + NOTE_TAGS.get(0).getNotes().size());
+                }
+                notes.clear();
+                endTag = true;
+                mode = -1;
+            } else {
+                switch (mode) {
+                    case 0:
+                        tagTitle = notesContentsReader.get(i);
+                        break;
+                    case 1:
+                        notereader.add(notesContentsReader.get(i));
+                        break;
+                }
+            }
         }
-        NoteKindAdapter adapter = new NoteKindAdapter(noteKinds, context);
+        List<NoteTag> tags = new ArrayList<>(NOTE_TAGS);
+        NoteTagAdapter adapter = new NoteTagAdapter(tags, context);
         RecyclerView_notes.setAdapter(adapter);
     }
 
     private void initScrollView(View view) {
         ScrollView_fragment_note = view.findViewById(R.id.ScrollView_fragment_note);
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            UIManager.ViewScrollListener listener = new UIManager.ViewScrollListener(this, 20);
+            ScrollView_fragment_note.setOnScrollChangeListener(listener);
+        }
+    }
+
+    private void initFAB(View view) {
+        FAB_createNote = view.findViewById(R.id.FAB_createNote);
+        FAB_createNote.setOnClickListener(view1 -> {
+            Intent intent = new Intent(activity, CreateFile.class);
+            activity.startActivity(intent);
+        });
     }
 
     private void getTheViewPagerRoll () {
@@ -259,21 +366,33 @@ public class NoteFragment extends Fragment {
         this.context = context;
     }
 
-    public static class NoteKind {
+    @Override
+    public void onHide() {
+        RelativeLayout.LayoutParams FAB_modifyExam_LayoutParams = (RelativeLayout.LayoutParams) FAB_createNote.getLayoutParams();
+        FAB_createNote.animate().translationY(FAB_createNote.getHeight() + FAB_modifyExam_LayoutParams.bottomMargin)
+                .setInterpolator(new AccelerateInterpolator(3));
+    }
+
+    @Override
+    public void onShow() {
+        FAB_createNote.animate().translationY(0).setInterpolator(new DecelerateInterpolator(3));
+    }
+
+    public static class NoteTag {
 
         private int RecyclerView_notes_firstItem;
         private float RecyclerView_notes_leftOffset;
 
-        private List<Note> notes;
+        private List<Note> notes = new ArrayList<>();
         private String title;
 
-        public NoteKind(List<Note> notes, String title) {
-            this.notes = notes;
+        public NoteTag(List<Note> notes, String title) {
+            this.notes.addAll(notes);
             this.title = title;
         }
 
-        public NoteKind(List<Note> notes, String title, int RecyclerView_notes_firstItem, float RecyclerView_notes_leftOffset) {
-            this.notes = notes;
+        public NoteTag(List<Note> notes, String title, int RecyclerView_notes_firstItem, float RecyclerView_notes_leftOffset) {
+            this.notes.addAll(notes);
             this.title = title;
             this.RecyclerView_notes_firstItem = RecyclerView_notes_firstItem;
             this.RecyclerView_notes_leftOffset = RecyclerView_notes_leftOffset;
@@ -314,23 +433,24 @@ public class NoteFragment extends Fragment {
 
     public static class Note implements Parcelable {
 
-        private String File_Path, File_Name, File_End, title, icon_Path, background_Path;
+        private String File_Path, File_Name, File_End, title, background_Path;
+        private int icon_ID;
 
         public Note(String file_Path, String file_Name, String file_End, String title) {
             this.File_Path = file_Path;
             this.File_Name = file_Name;
             this.File_End = file_End;
             this.title = title;
-            this.icon_Path = null;
+            this.icon_ID = 0;
             this.background_Path = null;
         }
 
-        public Note(String file_Path, String file_Name, String file_End, String title, String img, String background) {
+        public Note(String file_Path, String file_Name, String file_End, String title, int icon , String background) {
             this.File_Path = file_Path;
             this.File_Name = file_Name;
             this.File_End = file_End;
             this.title = title;
-            this.icon_Path = img;
+            this.icon_ID = icon;
             this.background_Path = background;
         }
 
@@ -350,8 +470,8 @@ public class NoteFragment extends Fragment {
             File_End = file_End;
         }
 
-        public void setIcon_Path(String icon_Path) {
-            this.icon_Path = icon_Path;
+        public void setIcon_Path(int icon) {
+            this.icon_ID = icon;
         }
 
         public void setBackground_Path(String background_Path) {
@@ -374,8 +494,8 @@ public class NoteFragment extends Fragment {
             return File_End;
         }
 
-        public String getIcon_Path() {
-            return icon_Path;
+        public int getIcon_ID() {
+            return icon_ID;
         }
 
         public String getBackground_Path() {
@@ -387,9 +507,8 @@ public class NoteFragment extends Fragment {
             this.File_Name = in.readString();
             this.File_End = in.readString();
             this.title = in.readString();
-            this.icon_Path = in.readString();
+            this.icon_ID = in.readInt();
             this.background_Path = in.readString();
-            //BitmapFactory.decodeFile();
         }
 
         public static final Creator<Note> CREATOR = new Creator<Note>() {
@@ -415,14 +534,14 @@ public class NoteFragment extends Fragment {
             parcel.writeString(File_Name);
             parcel.writeString(File_End);
             parcel.writeString(title);
-            parcel.writeString(icon_Path);
+            parcel.writeInt(icon_ID);
             parcel.writeString(background_Path);
         }
     }
 
-    private static class NoteKindAdapter extends RecyclerView.Adapter<NoteKindAdapter.ViewHolder> {
+    private static class NoteTagAdapter extends RecyclerView.Adapter<NoteTagAdapter.ViewHolder> {
 
-        private final List<NoteKind> noteKinds;
+        private final List<NoteTag> noteTags = new ArrayList<>();
         private final Context context;
 
         static class ViewHolder extends RecyclerView.ViewHolder {
@@ -436,8 +555,8 @@ public class NoteFragment extends Fragment {
             }
         }
 
-        public NoteKindAdapter(List<NoteKind> noteKinds, Context context) {
-            this.noteKinds = noteKinds;
+        public NoteTagAdapter(List<NoteTag> noteTags, Context context) {
+            this.noteTags.addAll(noteTags);
             this.context = context;
         }
 
@@ -450,34 +569,33 @@ public class NoteFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(NoteKindAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
-            NoteKind noteKind = noteKinds.get(pos);
+        public void onBindViewHolder(NoteTagAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
+            NoteTag noteTag = noteTags.get(pos);
             holder.setIsRecyclable(false);
-            holder.TextView_NoteKind.setText(noteKind.getTitle());
+            holder.TextView_NoteKind.setText(noteTag.getTitle());
             LinearLayoutManager layoutManager;
             layoutManager = holder.RecyclerView_Notes.getLayoutManager() == null ? new LinearLayoutManager(context) : (LinearLayoutManager) holder.RecyclerView_Notes.getLayoutManager();
-            layoutManager.scrollToPositionWithOffset(noteKind.getRecyclerView_notes_firstItem(), (int) noteKind.getRecyclerView_notes_leftOffset());
+            layoutManager.scrollToPositionWithOffset(noteTag.getRecyclerView_notes_firstItem(), (int) noteTag.getRecyclerView_notes_leftOffset());
             layoutManager.setOrientation(RecyclerView.HORIZONTAL);
             holder.RecyclerView_Notes.setLayoutManager(layoutManager);
 
-            NoteAdapter adapter = new NoteAdapter(noteKind.getNotes());
+            NoteAdapter adapter = new NoteAdapter(noteTag.getNotes());
             holder.RecyclerView_Notes.setAdapter(adapter);
             holder.RecyclerView_Notes.setOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                     super.onScrollStateChanged(recyclerView, newState);
-                    Log.d(TAG, "onScrollStateChanged: ");
                     LinearLayoutManager manager = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    noteKind.setRecyclerView_notes_firstItem(manager != null ? manager.findFirstVisibleItemPosition() : 0);
-                    View firstItemView = manager != null ? manager.findViewByPosition(noteKind.getRecyclerView_notes_firstItem()) : null;
-                    noteKind.setRecyclerView_notes_leftOffset(firstItemView != null ? firstItemView.getLeft() : 0);
+                    noteTag.setRecyclerView_notes_firstItem(manager != null ? manager.findFirstVisibleItemPosition() : 0);
+                    View firstItemView = manager != null ? manager.findViewByPosition(noteTag.getRecyclerView_notes_firstItem()) : null;
+                    noteTag.setRecyclerView_notes_leftOffset(firstItemView != null ? firstItemView.getLeft() : 0);
                 }
             });
         }
 
         @Override
         public int getItemCount() {
-            return this.noteKinds.size();
+            return this.noteTags.size();
         }
 
         private static class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
@@ -519,8 +637,8 @@ public class NoteFragment extends Fragment {
                 } else {
                     holder.RoundImageView_noteImg.setImageResource(R.drawable.img_note_defult_cover);
                 }
-                if (note.getIcon_Path() != null) {
-                    holder.RoundImageView_noteIcon.setImageBitmap(BitmapFactory.decodeFile(note.getIcon_Path()));
+                if (note.getIcon_ID() != 0) {
+                    holder.RoundImageView_noteIcon.setImageResource(note.getIcon_ID());
                 } else {
                     holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
                 }

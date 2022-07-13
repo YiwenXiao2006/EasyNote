@@ -3,8 +3,11 @@ package com.XYW.easynote.util;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Build;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -100,15 +103,25 @@ public class WindowManager {
         toast.show();
     }
 
-    public static void setWhiteStatusBar(Window window) {
-        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    public static void setWhiteStatusBar(Window window, boolean flag) {
+        if (flag)
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        else {
+            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        }
     }
 
-    public static void setBlackStatusBar(Window window) {
+    public static void setBlackStatusBar(Window window, boolean flag) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            if (flag)
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            else
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         } else {
-            window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            if (flag)
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            else
+                window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         }
     }
 
@@ -119,5 +132,22 @@ public class WindowManager {
      */
     public static int getUIMode(Activity activity) {
         return activity.getApplicationContext().getResources().getConfiguration().uiMode;
+    }
+
+    public void KeyBoardListen(Context context, Activity activity) {
+        //监听软键盘的状态
+        View rootLayout = activity.getWindow().getDecorView().findViewById(android.R.id.content);
+        rootLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                Rect r = new Rect();
+                //获取当前窗口实际的可见区域
+                activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
+                int height = r.height();
+                ViewGroup.LayoutParams params = rootLayout.getLayoutParams();
+                params.height = height + getStatusBarHeight(context, activity);
+                rootLayout.setLayoutParams(params);
+            }
+        });
     }
 }

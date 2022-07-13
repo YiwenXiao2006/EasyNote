@@ -82,7 +82,8 @@
                         android:id="@+id/Progressbar_messageBoxPGB"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical" />
+                        android:layout_gravity="center_vertical"
+                        style="@style/DetailProgressBar" />
 
                     <TextView
                         android:id="@+id/TextView_Content"

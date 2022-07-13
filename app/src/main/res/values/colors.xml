@@ -10,6 +10,7 @@
     <color name="text">#030303</color>
     <color name="subtext">#757575</color>
     <color name="gray">#CCCCCC</color>
+    <color name="cutline">#C6C6C6</color>
 
     <color name="ivory">#FFFFF0</color><!--象牙色-->
     <color name="lightyellow">#FFFFE0</color><!--亮黄色-->

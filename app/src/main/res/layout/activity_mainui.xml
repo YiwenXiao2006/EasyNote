@@ -10,15 +10,13 @@
     <RelativeLayout
         android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        tools:context="com.XYW.scoremanage.ui.MainMenu">
+        android:orientation="vertical">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="50dp">
-
 
             <com.google.android.material.appbar.AppBarLayout
                 android:layout_height="wrap_content"
@@ -31,9 +29,8 @@
                     android:layout_width="match_parent"
                     android:layout_height="20dp" />
 
-                <include layout="@layout/content_toolbar" />
+                <include layout="@layout/content_toolbar_primary" />
             </com.google.android.material.appbar.AppBarLayout>
-
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -44,7 +41,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    app:srcCompat="@drawable/img_background" />
+                    app:srcCompat="@drawable/img_background_1" />
 
                 <com.XYW.easynote.ui.DetailViewPager
                     android:id="@+id/DetailViewPager_MainUI"
