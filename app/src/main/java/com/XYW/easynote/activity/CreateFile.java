@@ -199,13 +199,13 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     }
 
     private boolean create() {
-        theme = EditText_createFile_theme.getText().toString();
+        theme = EditText_createFile_theme.getText().length() > 0 ? EditText_createFile_theme.getText().toString() : EditText_createFile_theme.getHint().toString();
         describe = EditText_createFile_describe.getText().toString();
         String dir, coverPath;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + theme;
+            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + "EasyNote" + File.separator + theme;
         } else {
-            dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + theme;
+            dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + "EasyNote" + File.separator + theme;
         }
         File path = new File(dir);
 

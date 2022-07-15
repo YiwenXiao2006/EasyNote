@@ -244,7 +244,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             return;
         }
         List<String> notesContentsReader = IOManager.readFileByLine(Notes_Contents);
-        if (!Objects.equals(notesContentsReader.get(0), "#EasyNote")) {
+        if (notesContentsReader.isEmpty() || !Objects.equals(notesContentsReader.get(0), "#EasyNote")) {
             return;
         }
 
