@@ -30,9 +30,6 @@
     <string name="text_button_negative_deny">Deny</string>
     <string name="text_button_positive_camera">Camera</string>
     <string name="text_button_negative_album">Album</string>
-    <string name="text_util_not_allowed_characters">Characters not allowed: </string>
-    <string name="text_util_cannot_input_more_1">Cannot enter more than</string>
-    <string name="text_util_cannot_input_more_2">character(s)</string>
     <string name="message_exit">Are you sure you want to exit?</string>
     <string name="message_selectcover">Choose a way to select the cover</string>
     <string name="message_clearcover">Clear the cover?</string>
@@ -40,4 +37,8 @@
     <string name="message_permission_denied_storage_2">Forbidding read-write permission will cause the data to be unable to be saved normally. You seem to have chosen not to ask again, you need to go to the setting to allow this permission.</string>
     <string name="message_permission_denied_camera_1">Allow camera access to shoot photo properly. \nClick \"Allow\" to use it!</string>
     <string name="message_permission_denied_camera_2">Allow camera access to shoot photo properly. You seem to have chosen not to ask again, you need to go to the setting to allow this permission.</string>
+    <string name="toast_camera_not_found">The camera is not available or the device has no camera</string>
+    <string name="toast_not_allowed_characters">Characters not allowed: </string>
+    <string name="toast_cannot_input_more_1">Cannot enter more than</string>
+    <string name="toast_cannot_input_more_2">character(s)</string>
 </resources>

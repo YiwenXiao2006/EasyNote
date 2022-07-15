@@ -179,6 +179,12 @@ public class IOManager {
         }
     }
 
+    /**
+     * 保存uri文件
+     * @param context 活动容器
+     * @param uri 源文件uri
+     * @param path 保存位置
+     */
     public static void writeFileWithUri(Context context, Uri uri, String path) {
         File saveFile = new File(path);
         FileInputStream inStream = null;
@@ -208,6 +214,47 @@ public class IOManager {
         }
     }
 
+    /**
+     * 移动文件位置
+     * @param file1 源文件
+     * @param file2 目标位置文件
+     * @param flag 是否删除源文件,true为删除,false为保留
+     */
+    public static void moveFile(File file1, File file2, boolean flag) {
+        FileInputStream inStream = null;
+        FileOutputStream outStream = null;
+        try {
+            if (!file2.exists()) {
+                file2.createNewFile();
+            }
+            inStream = new FileInputStream(file1);
+            outStream = new FileOutputStream(file2);
+            FileChannel inChannel = inStream.getChannel();
+            FileChannel outChannel = outStream.getChannel();
+            inChannel.transferTo(0, inChannel.size(), outChannel);
+            if (flag) {
+                file1.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (inStream != null) {
+                    inStream.close();
+                }
+                if (outStream != null) {
+                    outStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static boolean mkdir(File file) {
+        return file.mkdirs();
+    }
+
     public static File parseFile(Uri uri, Context context) {
         String path = null;
         if ("file".equals(uri.getScheme())) {
@@ -215,11 +262,11 @@ public class IOManager {
             if (path != null) {
                 path = Uri.decode(path);
                 ContentResolver cr = context.getContentResolver();
-                StringBuffer buff = new StringBuffer();
-                buff.append("(").append(MediaStore.Images.ImageColumns.DATA).append("=").append("'").append(path).append("'").append(")");
-                Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA }, buff.toString(), null, null);
+                Cursor cur = cr.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, new String[] { MediaStore.Images.ImageColumns._ID, MediaStore.Images.ImageColumns.DATA },
+                        "(" + MediaStore.Images.ImageColumns.DATA + "=" + "'" + path + "'" + ")",
+                        null, null);
                 int index = 0;
-                int dataIdx = 0;
+                int dataIdx;
                 for (cur.moveToFirst(); !cur.isAfterLast(); cur.moveToNext()) {
                     index = cur.getColumnIndex(MediaStore.Images.ImageColumns._ID);
                     index = cur.getInt(index);

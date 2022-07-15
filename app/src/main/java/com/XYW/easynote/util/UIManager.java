@@ -241,7 +241,7 @@ public class UIManager {
                     if (charSequence.charAt(j) == mFilter) {
                         editText.setText(charSequence.subSequence(0, charSequence.length() - 1));
                         editText.setSelection(editText.getText().toString().length());
-                        WindowManager.showToastWithGravity(context, context.getString(R.string.text_util_not_allowed_characters) + " \"" + mFilter + "\"",
+                        WindowManager.showToastWithGravity(context, context.getString(R.string.toast_not_allowed_characters) + " \"" + mFilter + "\"",
                                 Gravity.TOP, 0, 0, Toast.LENGTH_LONG);
                         return;
                     }
@@ -269,8 +269,8 @@ public class UIManager {
                                    Spanned dest, int dstart, int dend) {
             int keep = mMaxLength - (dest.length() - (dend - dstart));
             if (keep < (end - start)) {
-                WindowManager.showToastWithGravity(context, context.getString(R.string.text_util_cannot_input_more_1) + " " + mMaxLength + " " +
-                                context.getString(R.string.text_util_cannot_input_more_2),
+                WindowManager.showToastWithGravity(context, context.getString(R.string.toast_cannot_input_more_1) + " " + mMaxLength + " " +
+                                context.getString(R.string.toast_cannot_input_more_2),
                         Gravity.TOP, 0, 0, Toast.LENGTH_LONG);
             }
             if (keep <= 0) {

@@ -30,9 +30,6 @@
     <string name="text_button_negative_deny">拒绝</string>
     <string name="text_button_positive_camera">拍摄</string>
     <string name="text_button_negative_album">相册</string>
-    <string name="text_util_not_allowed_characters">不允许的字符：</string>
-    <string name="text_util_cannot_input_more_1">不能输入超过</string>
-    <string name="text_util_cannot_input_more_2">个字符</string>
     <string name="message_exit">确定要退出吗？</string>
     <string name="message_selectcover">选择一个方式来选取封面</string>
     <string name="message_clearcover">是否清除封面？</string>
@@ -40,5 +37,8 @@
     <string name="message_permission_denied_storage_2">禁止读写权限将导致数据无法正常保存，您似乎选择了不再询问，您需要前往设置允许该权限</string>
     <string name="message_permission_denied_camera_1">允许摄像头正常拍照，点击 \"同意\" 以启用摄像头</string>
     <string name="message_permission_denied_camera_2">允许摄像头正常拍照，您似乎选择了不再询问，您需要前往设置允许该权限</string>
-
+    <string name="toast_camera_not_found">摄像头不可用或该设备无摄像头</string>
+    <string name="toast_not_allowed_characters">不允许的字符：</string>
+    <string name="toast_cannot_input_more_1">不能输入超过</string>
+    <string name="toast_cannot_input_more_2">个字符</string>
 </resources>

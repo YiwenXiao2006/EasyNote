@@ -53,6 +53,10 @@ public class MessageBox {
             public Builder(Context context) {
                 this.context = context;
 
+                if (mDialog != null && mDialog.isShowing()) {
+                    mDialog.dismiss();
+                }
+
                 mDialog = new CreateMessageBox(context, R.style.Theme_AppCompat_Dialog);
                 LayoutInflater inflater =
                         (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

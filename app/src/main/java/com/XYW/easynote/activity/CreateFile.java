@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -200,6 +201,14 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     private boolean create() {
         theme = EditText_createFile_theme.getText().toString();
         describe = EditText_createFile_describe.getText().toString();
+        String dir;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + theme;
+        } else {
+            dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + theme;
+        }
+        File path = new File(dir);
+        IOManager.mkdir(path);
         return true;
     }
 
@@ -212,8 +221,9 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
 
     private void openCamera() {
         Intent captureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        int cameraNum = Camera.getNumberOfCameras();
         // 判断是否有相机
-        if (captureIntent.resolveActivity(getPackageManager()) != null) {
+        if (cameraNum > 0) {
             File photoFile = null;
             Uri photoUri = null;
 
@@ -244,6 +254,8 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                 captureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 startActivityForResult(captureIntent, IOManager.PHOTO_REQUEST_CAREMA);
             }
+        } else {
+            WindowManager.showToast(this, getString(R.string.toast_camera_not_found));
         }
     }
 
