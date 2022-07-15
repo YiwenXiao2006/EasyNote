@@ -201,7 +201,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         RecyclerView_notes = view.findViewById(R.id.RecyclerView_notekinds);
         setLayoutManager(RecyclerView_notes);
 
-        File Notes_Contents = new File(context.getFilesDir().getPath() + "/" + "Notes_Contents.ctt");
+        File Notes_Contents = new File(context.getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
         /*IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
                 "1\n" +
                 "<tag>\n" +

@@ -42,6 +42,7 @@
                     android:id="@+id/ImageView_messageBoxIcon"
                     android:layout_width="35dp"
                     android:layout_height="35dp"
+                    android:layout_marginEnd="10dp"
                     android:visibility="gone"
                     tools:ignore="ContentDescription" />
 

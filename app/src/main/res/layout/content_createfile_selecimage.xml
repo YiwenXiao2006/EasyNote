@@ -13,10 +13,15 @@
         android:id="@+id/ImageButton_selectcoverimage"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="10dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/shape_round_gray"
         android:scaleType="fitCenter"
         android:src="@drawable/general_folder_add"
-        android:background="@drawable/shape_round_gray"
         app:layout_aspectRatio="175%"
         app:layout_widthPercent="30%" />
 </androidx.percentlayout.widget.PercentRelativeLayout>

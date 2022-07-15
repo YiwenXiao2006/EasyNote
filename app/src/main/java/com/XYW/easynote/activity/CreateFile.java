@@ -39,7 +39,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
 
     private static final String TAG = "CreateFile";
 
-    private ImageView ImageView_createExamSubject;
+    private ImageView ImageView_noteCover;
     private PercentRelativeLayout Layout_content_createfile_selecimage, Layout_content_create_notecover;
     private EditText EditText_createFile_theme, EditText_createFile_describe;
     private TextView TextView_createFile_clearcover;
@@ -122,7 +122,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
         Layout_content_createfile_selecimage.setVisibility(View.GONE);
         Layout_content_create_notecover.setVisibility(View.VISIBLE);
         TextView_createFile_clearcover.setVisibility(View.VISIBLE);
-        ImageView_createExamSubject.setImageURI(uri);
+        ImageView_noteCover.setImageURI(uri);
         coverPath = new File(getExternalCacheDir(), "tempCover.jpg").getPath();
         IOManager.writeFileWithUri(this, uri, coverPath);
     }
@@ -148,7 +148,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             Layout_content_createfile_selecimage.setVisibility(View.GONE);
             Layout_content_create_notecover.setVisibility(View.VISIBLE);
             TextView_createFile_clearcover.setVisibility(View.VISIBLE);
-            ImageView_createExamSubject.setImageBitmap(BitmapFactory.decodeFile(coverPath));
+            ImageView_noteCover.setImageBitmap(BitmapFactory.decodeFile(coverPath));
         }
     }
 
@@ -195,20 +195,47 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     }
 
     private void initImageView() {
-        ImageView_createExamSubject = findViewById(R.id.ImageView_createExamSubject);
+        ImageView_noteCover = findViewById(R.id.ImageView_noteCover);
     }
 
     private boolean create() {
         theme = EditText_createFile_theme.getText().toString();
         describe = EditText_createFile_describe.getText().toString();
-        String dir;
+        String dir, coverPath;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + theme;
         } else {
             dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + theme;
         }
         File path = new File(dir);
+
+        if (path.exists()) {
+            new MessageBox.CreateMessageBox.Builder(this)
+                    .setTitle(getString(R.string.title_messagebox_file_exists))
+                    .setMessage(getString(R.string.message__file_exists))
+                    .setIcon(R.drawable.general_face_meh_fill)
+                    .setCancelable(true)
+                    .setCanceledOnTouchOutside(true)
+                    .setPositiveButton(getString(R.string.text_button_positive_defult), null)
+                    .create()
+                    .show();
+            return false;
+        }
+
         IOManager.mkdir(path);
+        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))){
+            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + ".jpg"), true);
+            coverPath = new File(path.getPath(), theme + ".jpg").getPath();
+        } else {
+            coverPath = null;
+        }
+
+
+        File Notes_Contents = new File(getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
+        if (!Notes_Contents.exists()) {
+            IOManager.createNewFile(Notes_Contents);
+        }
+
         return true;
     }
 
@@ -273,8 +300,8 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                 break;
             case R.id.ImageButton_selectcoverimage:
                 new MessageBox.CreateMessageBox.Builder(this)
-                        .setTitle(getString(R.string.title_messagebox_selectcover))
-                        .setMessage(getString(R.string.message_selectcover))
+                        .setTitle(getString(R.string.title_messagebox_select_cover))
+                        .setMessage(getString(R.string.message_select_cover))
                         .setCancelable(true)
                         .setCanceledOnTouchOutside(true)
                         .setPositiveButton(getString(R.string.text_button_positive_camera), () -> {
@@ -291,7 +318,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             case R.id.TextView_createFile_clearcover:
                 new MessageBox.CreateMessageBox.Builder(this)
                         .setTitle(getString(R.string.text_activity_createfile_clear))
-                        .setMessage(getString(R.string.message_clearcover))
+                        .setMessage(getString(R.string.message_clear_cover))
                         .setCancelable(true)
                         .setCanceledOnTouchOutside(true)
                         .setPositiveButton(getString(R.string.text_button_positive_defult), () -> {

@@ -255,6 +255,15 @@ public class IOManager {
         return file.mkdirs();
     }
 
+    public static boolean createNewFile(File file) {
+        try {
+            return file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public static File parseFile(Uri uri, Context context) {
         String path = null;
         if ("file".equals(uri.getScheme())) {
