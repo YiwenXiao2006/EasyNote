@@ -50,7 +50,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     private TextView TextView_createFile_clearcover;
 
     private PermissionManager permissionManager;
-    private String theme, describe, coverPath;
+    private String theme, describe, coverPath, describePath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,28 +206,13 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     private void create() {
         theme = EditText_createFile_theme.getText().length() > 0 ? EditText_createFile_theme.getText().toString() : EditText_createFile_theme.getHint().toString();
         describe = EditText_createFile_describe.getText().toString();
-        String dir, describePath;
+        String dir;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
         } else {
             dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
         }
         File path = new File(dir);
-
-        IOManager.mkdir(path);
-        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
-            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
-            coverPath = new File(path.getPath(), theme + "_cover.jpg").getPath();
-        } else {
-            coverPath = null;
-        }
-
-        if (!Objects.equals(describe, "") && describe != null) {
-            IOManager.writeFile(new File(path.getPath(), theme + "_describe.dsb"), describe, false);
-            describePath = new File(path.getPath(), theme + "_describe.dsb").getPath();
-        } else {
-            describePath = null;
-        }
 
         if (path.exists()) {
             new MessageBox.CreateMessageBox.Builder(this)
@@ -266,14 +251,43 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                             IOManager.writeFile(Notes_Contents, str.toString(), true);
                         }
 
+                        IOManager.mkdir(path);
+                        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
+                            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
+                            coverPath = new File(path.getPath(), theme + "_cover.jpg").getPath();
+                        } else {
+                            coverPath = null;
+                        }
+
+                        if (!Objects.equals(describe, "") && describe != null) {
+                            IOManager.writeFile(new File(path.getPath(), theme + "_describe.dsb"), describe, false);
+                            describePath = new File(path.getPath(), theme + "_describe.dsb").getPath();
+                        } else {
+                            describePath = null;
+                        }
+
                         create_writeFile("null", "null", "null", theme, describePath, coverPath);
                     })
                     .setNegativeButton(getString(R.string.text_button_negative_defult), null)
                     .create()
                     .show();
-        }
+        } else {
+            IOManager.mkdir(path);
+            if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
+                IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
+                coverPath = new File(path.getPath(), theme + "_cover.jpg").getPath();
+            } else {
+                coverPath = null;
+            }
 
-        create_writeFile("null", "null", "null", theme, describePath, coverPath);
+            if (!Objects.equals(describe, "") && describe != null) {
+                IOManager.writeFile(new File(path.getPath(), theme + "_describe.dsb"), describe, false);
+                describePath = new File(path.getPath(), theme + "_describe.dsb").getPath();
+            } else {
+                describePath = null;
+            }
+            create_writeFile("null", "null", "null", theme, describePath, coverPath);
+        }
     }
 
     private void create_writeFile(String File_Path, String File_Name, String File_End, String theme, String describePath, String coverPath) {
@@ -399,6 +413,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                 finish();
                 break;
             case R.id.ImageButton_toolbarDoneButton:
+                create();
                 break;
             case R.id.ImageButton_selectcoverimage:
                 new MessageBox.CreateMessageBox.Builder(this)
