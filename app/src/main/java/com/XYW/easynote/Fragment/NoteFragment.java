@@ -89,7 +89,6 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         this.container = container;
         init(view);
         return view;
-        // Hello
     }
 
     @Override
