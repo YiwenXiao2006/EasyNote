@@ -203,16 +203,31 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
         ImageView_noteCover = findViewById(R.id.ImageView_noteCover);
     }
 
-    private boolean create() {
+    private void create() {
         theme = EditText_createFile_theme.getText().length() > 0 ? EditText_createFile_theme.getText().toString() : EditText_createFile_theme.getHint().toString();
         describe = EditText_createFile_describe.getText().toString();
-        String dir, coverPath, describePath;
+        String dir, describePath;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
         } else {
             dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
         }
         File path = new File(dir);
+
+        IOManager.mkdir(path);
+        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
+            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
+            coverPath = new File(path.getPath(), theme + "_cover.jpg").getPath();
+        } else {
+            coverPath = null;
+        }
+
+        if (!Objects.equals(describe, "") && describe != null) {
+            IOManager.writeFile(new File(path.getPath(), theme + "_describe.dsb"), describe, false);
+            describePath = new File(path.getPath(), theme + "_describe.dsb").getPath();
+        } else {
+            describePath = null;
+        }
 
         if (path.exists()) {
             new MessageBox.CreateMessageBox.Builder(this)
@@ -250,29 +265,18 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                             str.append(IOManager.NOTE_ENDTAG + '\n');
                             IOManager.writeFile(Notes_Contents, str.toString(), true);
                         }
+
+                        create_writeFile("null", "null", "null", theme, describePath, coverPath);
                     })
                     .setNegativeButton(getString(R.string.text_button_negative_defult), null)
                     .create()
                     .show();
-            return false;
         }
 
-        IOManager.mkdir(path);
-        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
-            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
-            coverPath = new File(path.getPath(), theme + "_cover.jpg").getPath();
-        } else {
-            coverPath = null;
-        }
+        create_writeFile("null", "null", "null", theme, describePath, coverPath);
+    }
 
-        if (!Objects.equals(describe, "") && describe != null) {
-            IOManager.writeFile(new File(path.getPath(), theme + "_describe.dsb"), describe, false);
-            describePath = new File(path.getPath(), theme + "_describe.dsb").getPath();
-        } else {
-            describePath = null;
-        }
-
-
+    private void create_writeFile(String File_Path, String File_Name, String File_End, String theme, String describePath, String coverPath) {
         File Notes_Contents = new File(getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
 
         List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(this, Notes_Contents));
@@ -285,9 +289,9 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             IOManager.writeFile(Notes_Contents, IOManager.NOTE_TAG + '\n' +
                     IOManager.NOTE_DEFAULT_TAG_NAME + '\n' +
                     IOManager.NOTE_NOTE + '\n' +
-                    "null\n" +
-                    "null\n" +
-                    "null\n" +
+                    File_Path + '\n' +
+                    File_Name + '\n' +
+                    File_End + '\n' +
                     theme + '\n' +
                     describePath + '\n' +
                     "0\n" +
@@ -314,9 +318,9 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                 if (Objects.equals(Tags.get(i).getTitle(), IOManager.NOTE_DEFAULT_TAG_NAME) ||
                         Objects.equals(Tags.get(i).getTitle(), getString(R.string.text_fragment_note_mynotes_title))) {
                     str.append(IOManager.NOTE_NOTE + '\n');
-                    str.append("null" + '\n');
-                    str.append("null" + '\n');
-                    str.append("null" + '\n');
+                    str.append(File_Path).append('\n');
+                    str.append(File_Name).append('\n');
+                    str.append(File_End).append('\n');
                     str.append(theme).append('\n');
                     str.append(describePath).append('\n');
                     str.append(0).append('\n');
@@ -332,7 +336,9 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             }
         }
 
-        return true;
+        Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+        finish();
     }
 
     private void selectImage() {
@@ -393,11 +399,6 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                 finish();
                 break;
             case R.id.ImageButton_toolbarDoneButton:
-                if (create()) {
-                    intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
-                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                    finish();
-                }
                 break;
             case R.id.ImageButton_selectcoverimage:
                 new MessageBox.CreateMessageBox.Builder(this)
