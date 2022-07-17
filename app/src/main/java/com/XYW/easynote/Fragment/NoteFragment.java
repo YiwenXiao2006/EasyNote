@@ -2,9 +2,10 @@ package com.XYW.easynote.Fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
@@ -25,6 +26,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
@@ -57,6 +59,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
     private ViewGroup container;
     private Context context;
     private Activity activity;
+    private View NoteFragment_Layout;
 
     private int AllCount_viewpager = 0, CountNow_viewpager = 0;
     private static int SavedCount_viewpager, ScrollView_fragment_note_ScrollY;
@@ -66,6 +69,14 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
 
     private static List<NoteTag> NOTE_TAGS = new ArrayList<>();
 
+    LocalBroadcastManager broadcastManager_refresh_noteList;
+    BroadcastReceiver refresh_noteList = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            initRecyclerView(NoteFragment_Layout);
+        }
+    };
+
     public NoteFragment() {
 
     }
@@ -74,6 +85,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_note, container, false);
+        NoteFragment_Layout = view;
         this.container = container;
         init(view);
         return view;
@@ -102,8 +114,11 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
     }
 
     @Override
-    public void onSaveInstanceState (@NonNull Bundle outState){
-        super.onSaveInstanceState(outState);
+    public void onDestroy() {
+        super.onDestroy();
+        try {
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(refresh_noteList);
+        } catch (Exception e) {e.printStackTrace();}
     }
 
     private void setLayoutManager (RecyclerView recyclerView) {
@@ -134,6 +149,12 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         initRecyclerView(view);
         initScrollView(view);
         initFAB(view);
+
+
+        broadcastManager_refresh_noteList = LocalBroadcastManager.getInstance(getActivity());
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
+        broadcastManager_refresh_noteList.registerReceiver(refresh_noteList, intentFilter);
     }
 
     private void initViewPager (View view){
@@ -202,49 +223,15 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         setLayoutManager(RecyclerView_notes);
 
         File Notes_Contents = new File(context.getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
-        /*IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
-                "1\n" +
-                "<tag>\n" +
-                "TAG1\n" +
-                "<note>\n" +
-                "null\n" +
-                "null\n" +
-                "null\n" +
-                "test\n" +
-                "<endnote>\n" +
-                "<note>\n" +
-                "null\n" +
-                "null\n" +
-                "null\n" +
-                "test\n" +
-                "<endnote>\n" +
-                "<endtag>\n" +
-                "<tag>\n" +
-                "TAG2\n" +
-                "<note>\n" +
-                "null\n" +
-                "null\n" +
-                "null\n" +
-                "test\n" +
-                "<endnote>\n" +
-                "<note>\n" +
-                "null\n" +
-                "null\n" +
-                "null\n" +
-                "test\n" +
-                "<endnote>\n" +
-                "<note>\n" +
-                "null\n" +
-                "null\n" +
-                "null\n" +
-                "ENDNOTE\n" +
-                "<endnote>\n" +
-                "<endtag>", false);*/
         if (!Notes_Contents.exists()) {
+            RecyclerView_notes.setAdapter(null);
+            Log.d(TAG, "initRecyclerView: not exists");
             return;
         }
         List<String> notesContentsReader = IOManager.readFileByLine(Notes_Contents);
         if (notesContentsReader.isEmpty() || !Objects.equals(notesContentsReader.get(0), "#EasyNote")) {
+            RecyclerView_notes.setAdapter(null);
+            Log.d(TAG, "initRecyclerView: empty");
             return;
         }
 
@@ -265,32 +252,42 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         NOTE_TAGS = new ArrayList<>();
 
         for (int i = 2; i < notesContentsReader.size(); i++) {
-            if (Objects.equals(notesContentsReader.get(i), "<tag>") && endTag && endNote) {
+            if (Objects.equals(notesContentsReader.get(i), IOManager.NOTE_TAG) && endTag && endNote) {
                 mode = 0;
                 tagTitle = "";
                 endTag = false;
-            } else if (Objects.equals(notesContentsReader.get(i), "<note>") && endNote) {
+            } else if (Objects.equals(notesContentsReader.get(i), IOManager.NOTE_NOTE) && endNote) {
                 mode = 1;
                 endNote = false;
-            } else if (Objects.equals(notesContentsReader.get(i), "<endnote>")) {
+            } else if (Objects.equals(notesContentsReader.get(i), IOManager.NOTE_ENDNOTE)) {
                 if (notereader.size() < 1) {
                     continue;
                 }
-                notes.add(new Note(Objects.equals(notereader.get(0), "null") ? null : notereader.get(0),
-                        Objects.equals(notereader.get(1), "null") ? null : notereader.get(1),
-                        Objects.equals(notereader.get(2), "null") ? null : notereader.get(2),
-                        notereader.get(3)));
+                Log.d(TAG, "initRecyclerView: " + notes.size());
+                if (notereader.size() == 5) {
+                    notes.add(new Note(Objects.equals(notereader.get(0), "null") ? null : notereader.get(0),
+                            Objects.equals(notereader.get(1), "null") ? null : notereader.get(1),
+                            Objects.equals(notereader.get(2), "null") ? null : notereader.get(2),
+                            notereader.get(3),
+                            Objects.equals(notereader.get(4), "null") ? null : notereader.get(4)));
+                } else if (notereader.size() == 7) {
+                    notes.add(new Note(Objects.equals(notereader.get(0), "null") ? null : notereader.get(0),
+                            Objects.equals(notereader.get(1), "null") ? null : notereader.get(1),
+                            Objects.equals(notereader.get(2), "null") ? null : notereader.get(2),
+                            notereader.get(3),
+                            Objects.equals(notereader.get(4), "null") ? null : notereader.get(4),
+                            Objects.equals(notereader.get(5), "0") ? 0 : Integer.parseInt(notereader.get(5)),
+                            Objects.equals(notereader.get(6), "null") ? null : notereader.get(6)));
+                }
                 endNote = true;
                 mode = -1;
                 notereader.clear();
-            } else if (Objects.equals(notesContentsReader.get(i), "<endtag>")) {
-                if (!firstItem.isEmpty()) {
+            } else if (Objects.equals(notesContentsReader.get(i), IOManager.NOTE_ENDTAG)) {
+                if (!firstItem.isEmpty() && firstItem.size() > offset_Pos) {
                     NOTE_TAGS.add(new NoteTag(notes, tagTitle, firstItem.get(offset_Pos), offset.get(offset_Pos)));
                     offset_Pos ++;
-                    Log.d(TAG, "initRecyclerView: " + NOTE_TAGS.get(0).getNotes().size());
                 } else {
                     NOTE_TAGS.add(new NoteTag(notes, tagTitle));
-                    Log.d(TAG, "initRecyclerView: firstItem.isEmpty()" + NOTE_TAGS.get(0).getNotes().size());
                 }
                 notes.clear();
                 endTag = true;
@@ -298,7 +295,11 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             } else {
                 switch (mode) {
                     case 0:
-                        tagTitle = notesContentsReader.get(i);
+                        if (Objects.equals(notesContentsReader.get(i), IOManager.NOTE_DEFAULT_TAG_NAME)) {
+                            tagTitle = getString(R.string.text_fragment_note_mynotes_title);
+                        } else {
+                            tagTitle = notesContentsReader.get(i);
+                        }
                         break;
                     case 1:
                         notereader.add(notesContentsReader.get(i));
@@ -433,23 +434,25 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
 
     public static class Note implements Parcelable {
 
-        private String File_Path, File_Name, File_End, title, background_Path;
+        private String File_Path, File_Name, File_End, title, background_Path, describe_Path;
         private int icon_ID;
 
-        public Note(String file_Path, String file_Name, String file_End, String title) {
+        public Note(String file_Path, String file_Name, String file_End, String title, String describe_Path) {
             this.File_Path = file_Path;
             this.File_Name = file_Name;
             this.File_End = file_End;
             this.title = title;
+            this.describe_Path = describe_Path;
             this.icon_ID = 0;
             this.background_Path = null;
         }
 
-        public Note(String file_Path, String file_Name, String file_End, String title, int icon , String background) {
+        public Note(String file_Path, String file_Name, String file_End, String title, String describe_Path, int icon, String background) {
             this.File_Path = file_Path;
             this.File_Name = file_Name;
             this.File_End = file_End;
             this.title = title;
+            this.describe_Path = describe_Path;
             this.icon_ID = icon;
             this.background_Path = background;
         }
@@ -470,7 +473,11 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             File_End = file_End;
         }
 
-        public void setIcon_Path(int icon) {
+        public void setDescribe_Path(String describe_Path) {
+            this.describe_Path = describe_Path;
+        }
+
+        public void setIcon_ID(int icon) {
             this.icon_ID = icon;
         }
 
@@ -494,6 +501,10 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             return File_End;
         }
 
+        public String getDescribe_Path() {
+            return describe_Path;
+        }
+
         public int getIcon_ID() {
             return icon_ID;
         }
@@ -507,6 +518,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             this.File_Name = in.readString();
             this.File_End = in.readString();
             this.title = in.readString();
+            this.describe_Path = in.readString();
             this.icon_ID = in.readInt();
             this.background_Path = in.readString();
         }
@@ -534,6 +546,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             parcel.writeString(File_Name);
             parcel.writeString(File_End);
             parcel.writeString(title);
+            parcel.writeString(describe_Path);
             parcel.writeInt(icon_ID);
             parcel.writeString(background_Path);
         }
@@ -571,7 +584,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         @Override
         public void onBindViewHolder(NoteTagAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
             NoteTag noteTag = noteTags.get(pos);
-            holder.setIsRecyclable(false);
+            //holder.setIsRecyclable(false);
             holder.TextView_NoteKind.setText(noteTag.getTitle());
             LinearLayoutManager layoutManager;
             layoutManager = holder.RecyclerView_Notes.getLayoutManager() == null ? new LinearLayoutManager(context) : (LinearLayoutManager) holder.RecyclerView_Notes.getLayoutManager();
@@ -580,6 +593,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             holder.RecyclerView_Notes.setLayoutManager(layoutManager);
 
             NoteAdapter adapter = new NoteAdapter(noteTag.getNotes());
+
             holder.RecyclerView_Notes.setAdapter(adapter);
             holder.RecyclerView_Notes.setOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
@@ -630,12 +644,18 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             @Override
             public void onBindViewHolder(ViewHolder holder, @SuppressLint("RecyclerView") int pos) {
                 Note note = mNotes.get(pos);
-                holder.setIsRecyclable(false);
+                //holder.setIsRecyclable(false);
                 holder.TextView_noteTitle.setText(note.getTitle());
+                holder.RoundImageView_noteImg.setImageResource(R.drawable.img_note_defult_cover);
                 if (note.getBackground_Path() != null) {
-                    holder.RoundImageView_noteImg.setImageBitmap(BitmapFactory.decodeFile(note.getBackground_Path()));
-                } else {
-                    holder.RoundImageView_noteImg.setImageResource(R.drawable.img_note_defult_cover);
+                    holder.RoundImageView_noteImg.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            holder.RoundImageView_noteImg.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                            holder.RoundImageView_noteImg.setImageBitmap(IOManager.decodeBitmap(note.getBackground_Path(),
+                                    holder.RoundImageView_noteImg.getWidth(), holder.RoundImageView_noteImg.getHeight()));
+                        }
+                    });
                 }
                 if (note.getIcon_ID() != 0) {
                     holder.RoundImageView_noteIcon.setImageResource(note.getIcon_ID());
@@ -684,7 +704,6 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
 
     public static class ZoomOutPageTransformer implements ViewPager.PageTransformer {
         private static final float MIN_SCALE = 0.85f;
-        private static final float MIN_ALPHA = 0.5f;
 
         @Override
         public void transformPage(View view, float position) {
@@ -692,13 +711,9 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             int pageHeight = view.getHeight();
 
             if (position < -1) {
-                // [-Infinity,-1)
-                // This page is way off-screen to the left.
                 view.setAlpha(0);
 
             } else if (position <= 1) { //a页滑动至b页 ； a页从 0.0 -1 ；b页从1 ~ 0.0
-                // [-1,1]
-                // Modify the default slide transition to shrink the page as well
                 float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
                 float vertMargin = pageHeight * (1 - scaleFactor) / 2;
                 float horzMargin = pageWidth * (1 - scaleFactor) / 2;
@@ -707,17 +722,9 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                 } else {
                     view.setTranslationX(-horzMargin + vertMargin / 2);
                 }
-
-                // Scale the page down (between MIN_SCALE and 1)
                 view.setScaleX(scaleFactor);
                 view.setScaleY(scaleFactor);
-
-                // Fade the page relative to its size.
-                //view.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE)
-                //        / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
-
-            } else { // (1,+Infinity]
-                // This page is way off-screen to the right.
+            } else {
                 view.setAlpha(0);
             }
         }

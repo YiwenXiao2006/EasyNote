@@ -4,13 +4,13 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -22,8 +22,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.percentlayout.widget.PercentRelativeLayout;
 
+import com.XYW.easynote.Fragment.NoteFragment;
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.MessageBox;
 import com.XYW.easynote.util.ActivityManager;
@@ -34,6 +36,9 @@ import com.XYW.easynote.util.WindowManager;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class CreateFile extends AppCompatActivity implements View.OnClickListener {
 
@@ -109,7 +114,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                         uri = IOManager.imageFromCamera.getImageUriFromCamera();
                     } else {
                         // 使用图片路径加载
-                        Bitmap bitmap = BitmapFactory.decodeFile(IOManager.imageFromCamera.getImagePathFromCamera());
+                        Bitmap bitmap = IOManager.decodeBitmap(IOManager.imageFromCamera.getImagePathFromCamera(), 1920, 1080);
                         uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, null,null));
                     }
                     saveCover(uri);
@@ -148,7 +153,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             Layout_content_createfile_selecimage.setVisibility(View.GONE);
             Layout_content_create_notecover.setVisibility(View.VISIBLE);
             TextView_createFile_clearcover.setVisibility(View.VISIBLE);
-            ImageView_noteCover.setImageBitmap(BitmapFactory.decodeFile(coverPath));
+            ImageView_noteCover.setImageBitmap(IOManager.decodeBitmap(coverPath, 1920, 1080));
         }
     }
 
@@ -201,11 +206,11 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     private boolean create() {
         theme = EditText_createFile_theme.getText().length() > 0 ? EditText_createFile_theme.getText().toString() : EditText_createFile_theme.getHint().toString();
         describe = EditText_createFile_describe.getText().toString();
-        String dir, coverPath;
+        String dir, coverPath, describePath;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + "EasyNote" + File.separator + theme;
+            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
         } else {
-            dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + "EasyNote" + File.separator + theme;
+            dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
         }
         File path = new File(dir);
 
@@ -216,24 +221,115 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                     .setIcon(R.drawable.general_face_meh_fill)
                     .setCancelable(true)
                     .setCanceledOnTouchOutside(true)
-                    .setPositiveButton(getString(R.string.text_button_positive_defult), null)
+                    .setPositiveButton(getString(R.string.text_button_positive_defult), () -> {
+                        IOManager.deleteDir(path);
+
+                        File Notes_Contents = new File(getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
+                        List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(this, Notes_Contents));
+
+                        IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
+                                ActivityManager.getAppVersionCode(this) + '\n', false);
+
+                        for (int i = 0; i < Tags.size(); i++) {
+                            StringBuilder str = new StringBuilder();
+                            str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
+                            for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
+                                if (!Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), theme)) {
+                                    Log.d(TAG, "create: " + Tags.get(i).getNotes().get(j).getTitle());
+                                    str.append(IOManager.NOTE_NOTE + '\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getTitle()).append('\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
+                                    str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
+                                    str.append(IOManager.NOTE_ENDNOTE + '\n');
+                                }
+                            }
+                            str.append(IOManager.NOTE_ENDTAG + '\n');
+                            IOManager.writeFile(Notes_Contents, str.toString(), true);
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.text_button_negative_defult), null)
                     .create()
                     .show();
             return false;
         }
 
         IOManager.mkdir(path);
-        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))){
-            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + ".jpg"), true);
-            coverPath = new File(path.getPath(), theme + ".jpg").getPath();
+        if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
+            IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
+            coverPath = new File(path.getPath(), theme + "_cover.jpg").getPath();
         } else {
             coverPath = null;
         }
 
+        if (!Objects.equals(describe, "") && describe != null) {
+            IOManager.writeFile(new File(path.getPath(), theme + "_describe.dsb"), describe, false);
+            describePath = new File(path.getPath(), theme + "_describe.dsb").getPath();
+        } else {
+            describePath = null;
+        }
+
 
         File Notes_Contents = new File(getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
-        if (!Notes_Contents.exists()) {
-            IOManager.createNewFile(Notes_Contents);
+
+        List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(this, Notes_Contents));
+
+        Notes_Contents.delete();
+        IOManager.createNewFile(Notes_Contents);
+        IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
+                ActivityManager.getAppVersionCode(this) + '\n', false);
+        if (Tags.size() == 0) {
+            IOManager.writeFile(Notes_Contents, IOManager.NOTE_TAG + '\n' +
+                    IOManager.NOTE_DEFAULT_TAG_NAME + '\n' +
+                    IOManager.NOTE_NOTE + '\n' +
+                    "null\n" +
+                    "null\n" +
+                    "null\n" +
+                    theme + '\n' +
+                    describePath + '\n' +
+                    "0\n" +
+                    coverPath + '\n' +
+                    IOManager.NOTE_ENDNOTE + '\n' +
+                    IOManager.NOTE_ENDTAG + '\n', true);
+        } else {
+            for (int i = 0; i < Tags.size(); i++) {
+                int note_num = 0;
+                StringBuilder str = new StringBuilder();
+
+                str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
+                for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
+                    str.append(IOManager.NOTE_NOTE + '\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getTitle()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
+                    str.append(IOManager.NOTE_ENDNOTE + '\n');
+                }
+                if (Objects.equals(Tags.get(i).getTitle(), IOManager.NOTE_DEFAULT_TAG_NAME) ||
+                        Objects.equals(Tags.get(i).getTitle(), getString(R.string.text_fragment_note_mynotes_title))) {
+                    str.append(IOManager.NOTE_NOTE + '\n');
+                    str.append("null" + '\n');
+                    str.append("null" + '\n');
+                    str.append("null" + '\n');
+                    str.append(theme).append('\n');
+                    str.append(describePath).append('\n');
+                    str.append(0).append('\n');
+                    str.append(coverPath).append('\n');
+                    str.append(IOManager.NOTE_ENDNOTE + '\n');
+                    note_num ++;
+                }
+                if (note_num + Tags.get(i).getNotes().size() == 0) {
+                    continue;
+                }
+                str.append(IOManager.NOTE_ENDTAG + '\n');
+                IOManager.writeFile(Notes_Contents, str.toString(), true);
+            }
         }
 
         return true;
@@ -289,12 +385,17 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View view) {
+        Intent intent;
         switch (view.getId()) {
             case R.id.ImageButton_toolbarHomeButton:
+                intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                 finish();
                 break;
             case R.id.ImageButton_toolbarDoneButton:
                 if (create()) {
+                    intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
+                    LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
                     finish();
                 }
                 break;

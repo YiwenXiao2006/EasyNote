@@ -4,6 +4,8 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -11,6 +13,9 @@ import android.util.Log;
 
 import androidx.core.content.FileProvider;
 import androidx.core.os.EnvironmentCompat;
+
+import com.XYW.easynote.Fragment.NoteFragment;
+import com.XYW.easynote.R;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,6 +38,12 @@ import java.util.Objects;
 public class IOManager {
 
     private static final String TAG = "IOManager";
+
+    public static final String NOTE_TAG = "<tag>";
+    public static final String NOTE_ENDTAG = "<endtag>";
+    public static final String NOTE_NOTE = "<note>";
+    public static final String NOTE_ENDNOTE = "<endnote>";
+    public static final String NOTE_DEFAULT_TAG_NAME = "<default_tag_name>";
 
     public static final int PHOTO_REQUEST_CAREMA = 201;
     public static final int PHOTO_REQUEST_GALLERY = 202;
@@ -264,6 +275,21 @@ public class IOManager {
         }
     }
 
+    public static boolean deleteDir(File dir) {
+        if (dir == null || !dir.exists() || !dir.isDirectory()) {
+            return false;
+        } else {
+            for (File file : Objects.requireNonNull(dir.listFiles())) {
+                if (!file.delete()) {
+                    return false;
+                } else if (file.isDirectory()) {
+                    deleteDir(file);
+                }
+            }
+        }
+        return dir.delete();
+    }
+
     public static File parseFile(Uri uri, Context context) {
         String path = null;
         if ("file".equals(uri.getScheme())) {
@@ -307,6 +333,107 @@ public class IOManager {
             Log.i(TAG, "Uri Scheme:" + uri.getScheme());
         }
         return null;
+    }
+
+    /**
+
+     * 高效加载Bitmap
+     * @param filePath 文件路径
+     * @param requestWidth 所需宽度
+     * @param requestHeight 所需高度
+     */
+
+    public static Bitmap decodeBitmap(String filePath, int requestWidth, int requestHeight) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;  //第一次解析图片原始宽高信息，不会真正去加载图片
+        BitmapFactory.decodeFile(filePath, options);
+        options.inSampleSize = calculateInSampleSize(options, requestWidth, requestHeight);  //计算采样率inSampleSize
+        options.inJustDecodeBounds = false;  //第二次解析图片，真正加载图片
+        return BitmapFactory.decodeFile(filePath, options);
+    }
+
+    /**
+     * 计算采样率
+     *
+     * @param options 图片信息
+     * @param reqWidth 所需宽度
+     * @param reqHeight 所需高度
+     * @return 采样率
+     */
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        final int width = options.outWidth;
+        final int height = options.outHeight;
+        int inSampleSize = 1;
+        if (height > reqHeight || width > reqWidth) {  //计算图片原始宽高和所需宽高比例值
+            final int heightRatio = Math.round((float) height / (float) reqHeight);
+            final int widthRatio = Math.round((float) width / (float) reqWidth);
+            inSampleSize = Math.max(heightRatio, widthRatio);  //取宽高比例值中的较大值作为inSampleSize
+        }
+        return inSampleSize;
+    }
+
+    public static List<NoteFragment.NoteTag> readNoteCtt(Context context, File Notes_Contents) {
+        List<String> notesContentsReader = IOManager.readFileByLine(Notes_Contents);
+        int mode = 0; //0:read Tag 1:read Note
+        List<NoteFragment.Note> notes = new ArrayList<>();
+        List<String> notereader = new ArrayList<>();
+        List<NoteFragment.NoteTag> NOTE_TAGS = new ArrayList<>();
+        String tagTitle = "";
+        boolean endNote = true, endTag = true;
+
+        for (int i = 2; i < notesContentsReader.size(); i++) {
+            Log.d(TAG, "readNoteCtt: " + notesContentsReader.get(i));
+            if (Objects.equals(notesContentsReader.get(i), NOTE_TAG) && endTag && endNote) {
+                mode = 0;
+                tagTitle = "";
+                endTag = false;
+            } else if (Objects.equals(notesContentsReader.get(i), NOTE_NOTE) && endNote) {
+                mode = 1;
+                endNote = false;
+            } else if (Objects.equals(notesContentsReader.get(i), NOTE_ENDNOTE)) {
+                if (notereader.size() < 1) {
+                    continue;
+                }
+                if (notereader.size() == 5) {
+                    notes.add(new NoteFragment.Note(Objects.equals(notereader.get(0), "null") ? null : notereader.get(0),
+                            Objects.equals(notereader.get(1), "null") ? null : notereader.get(1),
+                            Objects.equals(notereader.get(2), "null") ? null : notereader.get(2),
+                            notereader.get(3),
+                            Objects.equals(notereader.get(4), "null") ? null : notereader.get(4)));
+                } else if (notereader.size() == 7) {
+                    notes.add(new NoteFragment.Note(Objects.equals(notereader.get(0), "null") ? null : notereader.get(0),
+                            Objects.equals(notereader.get(1), "null") ? null : notereader.get(1),
+                            Objects.equals(notereader.get(2), "null") ? null : notereader.get(2),
+                            notereader.get(3),
+                            Objects.equals(notereader.get(4), "null") ? null : notereader.get(4),
+                            Objects.equals(notereader.get(5), "0") ? 0 : Integer.parseInt(notereader.get(5)),
+                            Objects.equals(notereader.get(6), "null") ? null : notereader.get(6)));
+                }
+                endNote = true;
+                mode = -1;
+                notereader.clear();
+            } else if (Objects.equals(notesContentsReader.get(i), NOTE_ENDTAG)) {
+                NOTE_TAGS.add(new NoteFragment.NoteTag(notes, tagTitle));
+                notes.clear();
+                endTag = true;
+                mode = -1;
+            } else {
+                switch (mode) {
+                    case 0:
+                        if (Objects.equals(notesContentsReader.get(i), NOTE_DEFAULT_TAG_NAME)) {
+                            tagTitle = context.getString(R.string.text_fragment_note_mynotes_title);
+                        } else {
+                            tagTitle = notesContentsReader.get(i);
+                        }
+                        break;
+                    case 1:
+                        notereader.add(notesContentsReader.get(i));
+                        break;
+                }
+            }
+        }
+
+        return NOTE_TAGS;
     }
 
     /**
