@@ -88,7 +88,6 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         NoteFragment_Layout = view;
         this.container = container;
         init(view);
-        //Hello
         return view;
     }
 
