@@ -151,7 +151,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         initFAB(view);
 
 
-        broadcastManager_refresh_noteList = LocalBroadcastManager.getInstance(getActivity());
+        broadcastManager_refresh_noteList = LocalBroadcastManager.getInstance(activity);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
         broadcastManager_refresh_noteList.registerReceiver(refresh_noteList, intentFilter);
