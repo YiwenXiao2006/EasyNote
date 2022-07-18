@@ -19,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.EasyNote">
         <activity
+            android:name=".activity.NoteDoc"
+            android:exported="false" />
+        <activity
             android:name=".activity.CreateFile"
             android:exported="false"
             android:launchMode="singleTop" />

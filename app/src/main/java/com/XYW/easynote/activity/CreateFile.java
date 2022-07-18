@@ -10,7 +10,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -159,7 +158,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
 
     private void initTextView() {
         TextView TextView_toolbarTitle = findViewById(R.id.TextView_toolbarTitle);
-        TextView_toolbarTitle.setText(getString(R.string.title_newfile));
+        TextView_toolbarTitle.setText(getString(R.string.title_new_file));
 
         TextView_createFile_clearcover = findViewById(R.id.TextView_createFile_clearcover);
         TextView_createFile_clearcover.setVisibility(View.GONE);
@@ -234,7 +233,6 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                             str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
                             for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
                                 if (!Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), theme)) {
-                                    Log.d(TAG, "create: " + Tags.get(i).getNotes().get(j).getTitle());
                                     str.append(IOManager.NOTE_NOTE + '\n');
                                     str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
                                     str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
@@ -354,6 +352,10 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
 
         Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+
+        intent = new Intent(CreateFile.this, NoteDoc.class);
+        intent.putExtra("title", theme);
+        startActivity(intent);
         finish();
     }
 

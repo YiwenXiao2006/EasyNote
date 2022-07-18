@@ -4,7 +4,8 @@
 
     <string name="title_note">笔记</string>
     <string name="title_todo">待办事项</string>
-    <string name="title_newfile">新建文件</string>
+    <string name="title_new_file">新建文件</string>
+    <string name="title_note_doc">笔记</string>
     <string name="title_nav_settings">设置</string>
     <string name="title_nav_darkmode">深色模式</string>
     <string name="title_nav_exit">退出</string>
