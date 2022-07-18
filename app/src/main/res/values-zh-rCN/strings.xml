@@ -12,9 +12,13 @@
     <string name="title_menu_recently">最近</string>
     <string name="title_menu_newnote">新建笔记</string>
     <string name="title_menu_tags">分类</string>
+    <string name="title_menu_edit">编辑</string>
+    <string name="title_menu_view_notes">查看笔记</string>
+    <string name="title_menu_delete">删除</string>
     <string name="title_messagebox_permission_denied">权限被拒绝</string>
     <string name="title_messagebox_select_cover">选取封面</string>
     <string name="title_messagebox_file_exists">文件已存在</string>
+    <string name="title_messagebox_delete">删除</string>
     <string name="text_fragment_note_template_holiday_title">开始一个笔记!</string>
     <string name="text_fragment_note_template_holiday_subtitle">节日</string>
     <string name="text_fragment_note_template_summer_title">记录生活!</string>
@@ -25,8 +29,10 @@
     <string name="text_activity_createfile_cover">设置封面</string>
     <string name="text_activity_createfile_chooseimg">选择图片</string>
     <string name="text_activity_createfile_clear">清除</string>
-    <string name="text_button_positive_defult">确定</string>
-    <string name="text_button_negative_defult">取消</string>
+    <string name="text_activity_view_mode">查看模式</string>
+    <string name="text_activity_edit_mode">编辑模式</string>
+    <string name="text_button_positive_default">确定</string>
+    <string name="text_button_negative_default">取消</string>
     <string name="text_button_positive_allow_1">同意</string>
     <string name="text_button_positive_allow_2">前往设置</string>
     <string name="text_button_negative_deny">拒绝</string>
@@ -35,7 +41,8 @@
     <string name="message_exit">确定要退出吗？</string>
     <string name="message_select_cover">选择一个方式来选取封面</string>
     <string name="message_clear_cover">是否清除封面？</string>
-    <string name="message__file_exists">文件已存在，是否需要删除旧文件？或尝试更换主题</string>
+    <string name="message_file_exists">文件已存在，是否需要删除旧文件？或尝试更换主题</string>
+    <string name="message_delete_note">确认删除</string>
     <string name="message_permission_denied_storage_1">禁止读写权限将导致数据无法正常保存，点击 \"同意\" 才可以使用哦！</string>
     <string name="message_permission_denied_storage_2">禁止读写权限将导致数据无法正常保存，您似乎选择了不再询问，您需要前往设置允许该权限</string>
     <string name="message_permission_denied_camera_1">允许摄像头正常拍照，点击 \"同意\" 以启用摄像头</string>

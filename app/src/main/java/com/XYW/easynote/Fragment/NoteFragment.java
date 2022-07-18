@@ -665,13 +665,13 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                 } else {
                     holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
                 }
-                holder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(context, NoteDoc.class);
-                        intent.putExtra("title", note.getTitle());
-                        context.startActivity(intent);
-                    }
+                holder.itemView.setOnClickListener(view -> {
+                    Intent intent = new Intent(context, NoteDoc.class);
+                    intent.putExtra("title", note.getTitle());
+                    intent.putExtra("filePath", note.getFile_Path());
+                    intent.putExtra("fileName", note.getFile_Name());
+                    intent.putExtra("fileEnd", note.getFile_End());
+                    context.startActivity(intent);
                 });
             }
 

@@ -435,6 +435,34 @@ public class IOManager {
         return NOTE_TAGS;
     }
 
+    public static void deleteNoteInCtt(Context context, String name) {
+        File Notes_Contents = new File(context.getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
+        List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(context, Notes_Contents));
+
+        IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
+                ActivityManager.getAppVersionCode(context) + '\n', false);
+
+        for (int i = 0; i < Tags.size(); i++) {
+            StringBuilder str = new StringBuilder();
+            str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
+            for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
+                if (!Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), name)) {
+                    str.append(IOManager.NOTE_NOTE + '\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getTitle()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
+                    str.append(IOManager.NOTE_ENDNOTE + '\n');
+                }
+            }
+            str.append(IOManager.NOTE_ENDTAG + '\n');
+            IOManager.writeFile(Notes_Contents, str.toString(), true);
+        }
+    }
+
     /**
      * 获取图片的内容提供器
      */

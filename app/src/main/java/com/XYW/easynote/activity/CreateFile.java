@@ -215,39 +215,13 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
         if (path.exists()) {
             new MessageBox.CreateMessageBox.Builder(this)
                     .setTitle(getString(R.string.title_messagebox_file_exists))
-                    .setMessage(getString(R.string.message__file_exists))
+                    .setMessage(getString(R.string.message_file_exists))
                     .setIcon(R.drawable.general_face_meh_fill)
                     .setCancelable(true)
                     .setCanceledOnTouchOutside(true)
-                    .setPositiveButton(getString(R.string.text_button_positive_defult), () -> {
+                    .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
                         IOManager.deleteDir(path);
-
-                        File Notes_Contents = new File(getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
-                        List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(this, Notes_Contents));
-
-                        IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
-                                ActivityManager.getAppVersionCode(this) + '\n', false);
-
-                        for (int i = 0; i < Tags.size(); i++) {
-                            StringBuilder str = new StringBuilder();
-                            str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
-                            for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
-                                if (!Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), theme)) {
-                                    str.append(IOManager.NOTE_NOTE + '\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getTitle()).append('\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
-                                    str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
-                                    str.append(IOManager.NOTE_ENDNOTE + '\n');
-                                }
-                            }
-                            str.append(IOManager.NOTE_ENDTAG + '\n');
-                            IOManager.writeFile(Notes_Contents, str.toString(), true);
-                        }
-
+                        IOManager.deleteNoteInCtt(CreateFile.this, theme);
                         IOManager.mkdir(path);
                         if (IOManager.fileExists(new File(getExternalCacheDir(), "tempCover.jpg"))) {
                             IOManager.moveFile(new File(getExternalCacheDir(), "tempCover.jpg"), new File(path.getPath(), theme + "_cover.jpg"), true);
@@ -265,7 +239,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
 
                         create_writeFile(file_Path, file_Name, file_End, theme, describePath, coverPath);
                     })
-                    .setNegativeButton(getString(R.string.text_button_negative_defult), null)
+                    .setNegativeButton(getString(R.string.text_button_negative_default), null)
                     .create()
                     .show();
         } else {
@@ -442,12 +416,12 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                         .setMessage(getString(R.string.message_clear_cover))
                         .setCancelable(true)
                         .setCanceledOnTouchOutside(true)
-                        .setPositiveButton(getString(R.string.text_button_positive_defult), () -> {
+                        .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
                             Layout_content_create_notecover.setVisibility(View.GONE);
                             Layout_content_createfile_selecimage.setVisibility(View.VISIBLE);
                             TextView_createFile_clearcover.setVisibility(View.GONE);
                         })
-                        .setNegativeButton(getString(R.string.text_button_negative_defult), null)
+                        .setNegativeButton(getString(R.string.text_button_negative_default), null)
                         .create()
                         .show();
                 break;

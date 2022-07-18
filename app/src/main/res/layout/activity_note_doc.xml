@@ -30,5 +30,10 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/img_papertexture" />
+
+        <FrameLayout
+            android:id="@+id/FrameLayout_NoteDoc"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </RelativeLayout>
 </LinearLayout>

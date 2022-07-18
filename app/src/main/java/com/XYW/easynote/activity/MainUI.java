@@ -395,8 +395,8 @@ public class MainUI extends AppCompatActivity {
                             .setMessage(getString(R.string.message_exit))
                             .setCancelable(true)
                             .setCanceledOnTouchOutside(true)
-                            .setPositiveButton(getString(R.string.text_button_positive_defult), this::finish)
-                            .setNegativeButton(getString(R.string.text_button_negative_defult), null)
+                            .setPositiveButton(getString(R.string.text_button_positive_default), this::finish)
+                            .setNegativeButton(getString(R.string.text_button_negative_default), null)
                             .create()
                             .show();
                 break;

@@ -12,9 +12,13 @@
     <string name="title_menu_recently">Recently</string>
     <string name="title_menu_newnote">New note</string>
     <string name="title_menu_tags">Tags</string>
+    <string name="title_menu_edit">Edit</string>
+    <string name="title_menu_view_notes">View notes</string>
+    <string name="title_menu_delete">Delete</string>
     <string name="title_messagebox_permission_denied">Permission denied</string>
     <string name="title_messagebox_select_cover">Select cover</string>
     <string name="title_messagebox_file_exists">File exists</string>
+    <string name="title_messagebox_delete">Delete</string>
     <string name="text_fragment_note_template_holiday_title">Start a note!</string>
     <string name="text_fragment_note_template_holiday_subtitle">Holiday</string>
     <string name="text_fragment_note_template_summer_title">Record life!</string>
@@ -25,8 +29,10 @@
     <string name="text_activity_createfile_cover">Cover</string>
     <string name="text_activity_createfile_chooseimg">Select</string>
     <string name="text_activity_createfile_clear">Clear</string>
-    <string name="text_button_positive_defult">OK</string>
-    <string name="text_button_negative_defult">Cancel</string>
+    <string name="text_activity_view_mode">View Mode</string>
+    <string name="text_activity_edit_mode">Edit Mode</string>
+    <string name="text_button_positive_default">OK</string>
+    <string name="text_button_negative_default">Cancel</string>
     <string name="text_button_positive_allow_1">Allow</string>
     <string name="text_button_positive_allow_2">To set allow</string>
     <string name="text_button_negative_deny">Deny</string>
@@ -35,7 +41,8 @@
     <string name="message_exit">Are you sure you want to exit?</string>
     <string name="message_select_cover">Choose a way to select the cover</string>
     <string name="message_clear_cover">Clear the cover?</string>
-    <string name="message__file_exists">The file already exists, do you need to delete the old file? Or try changing the theme</string>
+    <string name="message_file_exists">The file already exists, do you need to delete the old file? Or try changing the theme</string>
+    <string name="message_delete_note">Confirm to delete</string>
     <string name="message_permission_denied_storage_1">Forbidding read-write permission will cause the data to be unable to be saved normally. \nClick \"Allow\" to use it!</string>
     <string name="message_permission_denied_storage_2">Forbidding read-write permission will cause the data to be unable to be saved normally. You seem to have chosen not to ask again, you need to go to the setting to allow this permission.</string>
     <string name="message_permission_denied_camera_1">Allow camera access to shoot photo properly. \nClick \"Allow\" to use it!</string>
