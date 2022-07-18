@@ -382,7 +382,6 @@ public class IOManager {
         boolean endNote = true, endTag = true;
 
         for (int i = 2; i < notesContentsReader.size(); i++) {
-            Log.d(TAG, "readNoteCtt: " + notesContentsReader.get(i));
             if (Objects.equals(notesContentsReader.get(i), NOTE_TAG) && endTag && endNote) {
                 mode = 0;
                 tagTitle = "";

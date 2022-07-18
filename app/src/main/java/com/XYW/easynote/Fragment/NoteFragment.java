@@ -34,6 +34,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.XYW.easynote.R;
 import com.XYW.easynote.activity.CreateFile;
+import com.XYW.easynote.activity.NoteDoc;
 import com.XYW.easynote.ui.DetailViewPager;
 import com.XYW.easynote.ui.RoundImageView;
 import com.XYW.easynote.util.IOManager;
@@ -592,7 +593,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             layoutManager.setOrientation(RecyclerView.HORIZONTAL);
             holder.RecyclerView_Notes.setLayoutManager(layoutManager);
 
-            NoteAdapter adapter = new NoteAdapter(noteTag.getNotes());
+            NoteAdapter adapter = new NoteAdapter(noteTag.getNotes(), context);
 
             holder.RecyclerView_Notes.setAdapter(adapter);
             holder.RecyclerView_Notes.setOnScrollListener(new RecyclerView.OnScrollListener() {
@@ -615,6 +616,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         private static class NoteAdapter extends RecyclerView.Adapter<NoteAdapter.ViewHolder> {
 
             private final List<Note> mNotes;
+            private final Context context;
 
             static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -629,8 +631,9 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                 }
             }
 
-            public NoteAdapter(List<Note> mNotes) {
+            public NoteAdapter(List<Note> mNotes, Context context) {
                 this.mNotes = mNotes;
+                this.context = context;
             }
 
             @NonNull
@@ -662,6 +665,14 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                 } else {
                     holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
                 }
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(context, NoteDoc.class);
+                        intent.putExtra("title", note.getTitle());
+                        context.startActivity(intent);
+                    }
+                });
             }
 
             @Override
