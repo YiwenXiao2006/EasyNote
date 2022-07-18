@@ -306,21 +306,10 @@ public class MainUI extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            switch (position) {
-                case 0:
-                    return noteFragment;
-                default:
-                    return todoFragment;
+            if (position == 0) {
+                return noteFragment;
             }
-        }
-
-        int getTitle(int position) {
-            switch (position) {
-                case 0:
-                    return R.string.title_note;
-                default:
-                    return R.string.title_todo;
-            }
+            return todoFragment;
         }
     }
 
