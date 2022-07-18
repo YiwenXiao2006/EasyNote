@@ -8,7 +8,7 @@
 
     <com.suke.widget.SwitchButton
         android:id="@+id/SwitchButton_darkmode"
-        android:layout_width="49.5dp"
+        android:layout_width="45dp"
         android:layout_height="27dp"
         app:sb_checked_color="@color/PrimaryVariant"
         app:sb_show_indicator="false" />

@@ -44,6 +44,7 @@ public class IOManager {
     public static final String NOTE_NOTE = "<note>";
     public static final String NOTE_ENDNOTE = "<endnote>";
     public static final String NOTE_DEFAULT_TAG_NAME = "<default_tag_name>";
+    public static final String NOTE_FILE_END = "note";
 
     public static final int PHOTO_REQUEST_CAREMA = 201;
     public static final int PHOTO_REQUEST_GALLERY = 202;
@@ -262,32 +263,31 @@ public class IOManager {
         }
     }
 
-    public static boolean mkdir(File file) {
-        return file.mkdirs();
+    public static void mkdir(File file) {
+        file.mkdirs();
     }
 
-    public static boolean createNewFile(File file) {
+    public static void createNewFile(File file) {
         try {
-            return file.createNewFile();
+            file.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
-    public static boolean deleteDir(File dir) {
+    public static void deleteDir(File dir) {
         if (dir == null || !dir.exists() || !dir.isDirectory()) {
-            return false;
+            return;
         } else {
             for (File file : Objects.requireNonNull(dir.listFiles())) {
                 if (!file.delete()) {
-                    return false;
+                    return;
                 } else if (file.isDirectory()) {
                     deleteDir(file);
                 }
             }
         }
-        return dir.delete();
+        dir.delete();
     }
 
     public static File parseFile(Uri uri, Context context) {

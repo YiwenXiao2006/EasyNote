@@ -50,7 +50,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     private TextView TextView_createFile_clearcover;
 
     private PermissionManager permissionManager;
-    private String theme, describe, coverPath, describePath;
+    private String theme, describe, coverPath, describePath, file_Path, file_Name, file_End;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -206,13 +206,12 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
     private void create() {
         theme = EditText_createFile_theme.getText().length() > 0 ? EditText_createFile_theme.getText().toString() : EditText_createFile_theme.getHint().toString();
         describe = EditText_createFile_describe.getText().toString();
-        String dir;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
-        } else {
-            dir = Environment.getExternalStorageDirectory().getPath() + File.separator + "Documents" + File.separator + "EasyNote" + File.separator + ".nomedia" + File.separator + theme;
-        }
+        String dir = getFilesDir() + File.separator + "Notes" + File.separator + theme;
+
         File path = new File(dir);
+        file_Path = path.getPath();
+        file_Name = theme;
+        file_End = IOManager.NOTE_FILE_END;
 
         if (path.exists()) {
             new MessageBox.CreateMessageBox.Builder(this)
@@ -266,7 +265,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                             describePath = null;
                         }
 
-                        create_writeFile("null", "null", "null", theme, describePath, coverPath);
+                        create_writeFile(file_Path, file_Name, file_End, theme, describePath, coverPath);
                     })
                     .setNegativeButton(getString(R.string.text_button_negative_defult), null)
                     .create()
@@ -286,7 +285,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             } else {
                 describePath = null;
             }
-            create_writeFile("null", "null", "null", theme, describePath, coverPath);
+            create_writeFile(file_Path, file_Name, file_End, theme, describePath, coverPath);
         }
     }
 
@@ -349,6 +348,9 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                 IOManager.writeFile(Notes_Contents, str.toString(), true);
             }
         }
+
+        File Note_File = new File(file_Path , file_Name + "." + file_End);
+        IOManager.createNewFile(Note_File);
 
         Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
