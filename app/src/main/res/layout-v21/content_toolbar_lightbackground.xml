@@ -6,35 +6,45 @@
     android:layout_height="@dimen/toolbar_height"
     app:popupTheme="@style/Theme.EasyNote.PopupOverlay">
 
-    <ImageButton
-        android:id="@+id/ImageButton_toolbarHomeButton"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="center|start"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:scaleType="centerCrop"
-        android:src="@drawable/direction_left"
-        android:visibility="gone"
-        app:tint="@color/Primary" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/TextView_toolbarTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:textColor="@color/text"
-        android:textSize="15sp"/>
+        <ImageButton
+            android:id="@+id/ImageButton_toolbarHomeButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_weight="0"
+            android:layout_gravity="center|start"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerCrop"
+            android:src="@drawable/direction_left"
+            android:visibility="gone"
+            app:tint="@color/Primary" />
 
-    <ImageButton
-        android:id="@+id/ImageButton_toolbarDoneButton"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_gravity="center|end"
-        android:layout_marginRight="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="?android:attr/selectableItemBackgroundBorderless"
-        android:scaleType="centerCrop"
-        android:src="@drawable/tips_check"
-        android:visibility="gone"
-        app:tint="@color/Primary" />
+        <TextView
+            android:id="@+id/TextView_toolbarTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/text"
+            android:textSize="15sp"/>
+
+        <ImageButton
+            android:id="@+id/ImageButton_toolbarDoneButton"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_weight="0"
+            android:layout_gravity="center|end"
+            android:layout_marginRight="16dp"
+            android:layout_marginEnd="16dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerCrop"
+            android:src="@drawable/tips_check"
+            android:visibility="gone"
+            app:tint="@color/Primary" />
+    </LinearLayout>
 </androidx.appcompat.widget.Toolbar>
