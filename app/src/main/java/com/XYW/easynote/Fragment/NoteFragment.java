@@ -671,6 +671,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                     intent.putExtra("filePath", note.getFile_Path());
                     intent.putExtra("fileName", note.getFile_Name());
                     intent.putExtra("fileEnd", note.getFile_End());
+                    intent.putExtra("EditMode", false);
                     context.startActivity(intent);
                 });
             }

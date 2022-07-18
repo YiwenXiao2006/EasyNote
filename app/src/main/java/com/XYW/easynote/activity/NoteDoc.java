@@ -65,8 +65,8 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putString("title", title_File_Theme);
         outState.putBoolean("EditMode", EditMode);
+        outState.putString("title", title_File_Theme);
         outState.putString("filePath", file_Path);
         outState.putString("fileName", file_Name);
         outState.putString("fileEnd", file_End);
@@ -134,10 +134,11 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
             file_Path = intent.getStringExtra("filePath");
             file_Name = intent.getStringExtra("fileName");
             file_End = intent.getStringExtra("fileEnd");
+            EditMode = intent.getBooleanExtra("EditMode", false);
         }
         if (bundle != null) {
-            title_File_Theme = bundle.getString("title", getString(R.string.title_note_doc));
             EditMode = bundle.getBoolean("EditMode", false);
+            title_File_Theme = bundle.getString("title", getString(R.string.title_note_doc));
             file_Path = bundle.getString("filePath", null);
             file_Name = bundle.getString("fileName", null);
             file_End = bundle.getString("fileEnd", null);
@@ -151,7 +152,12 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
         if (Objects.equals(title_File_Theme, "") || title_File_Theme == null) {
             title_File_Theme = getString(R.string.title_note_doc);
         }
-        String title = title_File_Theme + " ("  + getString(R.string.text_activity_view_mode) + ")";
+        String title;
+        if (EditMode) {
+            title = title_File_Theme + " ("  + getString(R.string.text_activity_edit_mode) + ")";
+        } else {
+            title = title_File_Theme + " ("  + getString(R.string.text_activity_view_mode) + ")";
+        }
         TextView_toolbarTitle = findViewById(R.id.TextView_toolbarTitle);
         TextView_toolbarTitle.setText(title);
     }
@@ -169,7 +175,11 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
     }
 
     private void initFrameLayout() {
-        changeFragment(new ViewDocFragment(), R.id.FrameLayout_NoteDoc);
+        if (EditMode) {
+            changeFragment(new EditDocFragment(), R.id.FrameLayout_NoteDoc);
+        } else {
+            changeFragment(new ViewDocFragment(), R.id.FrameLayout_NoteDoc);
+        }
     }
 
     private void changeFragment(Fragment fragment, int frameLayout) {
