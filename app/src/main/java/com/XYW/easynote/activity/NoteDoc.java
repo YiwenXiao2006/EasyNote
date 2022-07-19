@@ -55,25 +55,26 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (!EditMode && !Edited) {
-                return super.onKeyDown(keyCode, event);
-            }
             if((System.currentTimeMillis() - exitTime) > 2000) {
                 WindowManager.showToast(this, getString(R.string.toast_one_more_time_back));
                 exitTime = System.currentTimeMillis();
             } else {
-                new MessageBox.CreateMessageBox.Builder(this)
-                        .setTitle(getString(R.string.title_menu_save))
-                        .setMessage(getString(R.string.massage_save_note))
-                        .setCancelable(true)
-                        .setCanceledOnTouchOutside(true)
-                        .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
-                            save();
-                            finish();
-                        })
-                        .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finish)
-                        .create()
-                        .show();
+                if (!Edited) {
+                    return super.onKeyDown(keyCode, event);
+                } else {
+                    new MessageBox.CreateMessageBox.Builder(this)
+                            .setTitle(getString(R.string.title_menu_save))
+                            .setMessage(getString(R.string.massage_save_note))
+                            .setCancelable(true)
+                            .setCanceledOnTouchOutside(true)
+                            .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
+                                save();
+                                finish();
+                            })
+                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finish)
+                            .create()
+                            .show();
+                }
             }
             return true;
         }
