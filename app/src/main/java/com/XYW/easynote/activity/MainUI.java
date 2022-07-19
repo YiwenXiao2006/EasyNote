@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -358,7 +357,6 @@ public class MainUI extends AppCompatActivity {
         }
 
         switchButton_darkMode.setOnTouchListener((view, motionEvent) -> {
-            Log.d(TAG, "initNavigationView: " + motionEvent.getAction());
             switch (motionEvent.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     DrawerLayout_MainUI.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_OPEN); //关闭手势滑动

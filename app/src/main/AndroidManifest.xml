@@ -17,7 +17,8 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@drawable/icon_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.EasyNote">
+        android:theme="@style/Theme.EasyNote"
+        tools:replace="android:allowBackup">
         <activity
             android:name=".activity.NoteDoc"
             android:exported="false" />

@@ -24,6 +24,7 @@ import com.XYW.easynote.ui.adapter.ListPopupItem;
 import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
 import com.XYW.easynote.util.ActivityManager;
 import com.XYW.easynote.util.IOManager;
+import com.ns.yc.yccustomtextlib.utils.HyperLibUtils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,6 +38,16 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
 
     private String title_File_Theme, file_Path, file_Name, file_End;
     private boolean EditMode = false;
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        //判断键盘是否弹出
+        boolean softInputVisible = HyperLibUtils.isSoftInputVisible(this);
+        if (softInputVisible){
+            HyperLibUtils.hideSoftInput(this);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
