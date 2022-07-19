@@ -47,7 +47,10 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN){
+        if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (!EditMode) {
+                return super.onKeyDown(keyCode, event);
+            }
             if((System.currentTimeMillis() - exitTime) > 2000) {
                 WindowManager.showToast(this, getString(R.string.toast_one_more_time_back));
                 exitTime = System.currentTimeMillis();
