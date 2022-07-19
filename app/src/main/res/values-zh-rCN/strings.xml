@@ -24,6 +24,7 @@
     <string name="text_fragment_note_template_summer_title">记录生活!</string>
     <string name="text_fragment_note_template_summer_subtitle">夏季</string>
     <string name="text_fragment_note_mynotes_title">我的笔记</string>
+    <string name="text_fragment_edit_doc_bold">粗体</string>
     <string name="text_activity_createfile_theme">标题</string>
     <string name="text_activity_createfile_describe">描述</string>
     <string name="text_activity_createfile_cover">设置封面</string>

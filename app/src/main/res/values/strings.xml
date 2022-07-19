@@ -24,6 +24,7 @@
     <string name="text_fragment_note_template_summer_title">Record life!</string>
     <string name="text_fragment_note_template_summer_subtitle">Summer</string>
     <string name="text_fragment_note_mynotes_title">My notes</string>
+    <string name="text_fragment_edit_doc_bold">Bold</string>
     <string name="text_activity_createfile_theme">Theme</string>
     <string name="text_activity_createfile_describe">Describe</string>
     <string name="text_activity_createfile_cover">Cover</string>

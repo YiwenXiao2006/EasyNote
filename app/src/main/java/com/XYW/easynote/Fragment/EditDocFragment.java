@@ -18,7 +18,7 @@ import com.XYW.easynote.util.WindowManager;
 import com.ns.yc.yccustomtextlib.edit.inter.OnHyperEditListener;
 import com.ns.yc.yccustomtextlib.edit.view.HyperTextEditor;
 
-public class EditDocFragment extends Fragment {
+public class EditDocFragment extends Fragment implements View.OnClickListener {
 
     private HyperTextEditor HTE_edit_doc;
 
@@ -50,7 +50,11 @@ public class EditDocFragment extends Fragment {
     }
 
     private void init(View view) {
+        WindowManager windowManager = new WindowManager();
+        windowManager.KeyBoardListen(context, activity);
+
         initHyperTextEditor(view);
+        initTextView(view);
     }
 
     private void initHyperTextEditor(View view) {
@@ -81,5 +85,20 @@ public class EditDocFragment extends Fragment {
                 //HTE_edit_doc.onImageCloseClick(view);
             }
         });
+    }
+
+    private void initTextView(View view) {
+        view.findViewById(R.id.TextView_Edit_Bold).setOnClickListener(this);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.TextView_Edit_Bold:
+                HTE_edit_doc.bold();
+                break;
+            default:
+                break;
+        }
     }
 }
