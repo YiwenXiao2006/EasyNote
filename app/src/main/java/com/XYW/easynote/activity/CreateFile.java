@@ -333,6 +333,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
         intent.putExtra("fileName", file_Name);
         intent.putExtra("fileEnd", file_End);
         intent.putExtra("EditMode", true);
+        intent.putExtra("text_HTML", "");
         startActivity(intent);
         finish();
     }

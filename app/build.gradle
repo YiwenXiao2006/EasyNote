@@ -32,7 +32,7 @@ android {
 
 dependencies {
     // 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
-    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation 'androidx.navigation:navigation-fragment:2.3.5'
@@ -42,7 +42,7 @@ dependencies {
     // 百分比布局
     implementation 'androidx.percentlayout:percentlayout:1.0.0'
     // 富文本
-    implementation 'jp.wasabeef:richeditor-android:1.2.2'
+    implementation 'jp.wasabeef:richeditor-android:2.0.0'
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'

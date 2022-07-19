@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -65,6 +66,25 @@ public class MainUI extends AppCompatActivity {
     private SharedPreferences.Editor editor;
     private boolean darkMode = false, drawerOpen = false;
     private int system_ui_mode = UiModeManager.MODE_NIGHT_NO;
+    private long exitTime = 0;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
+            if (DrawerLayout_MainUI.isOpen()) {
+                DrawerLayout_MainUI.close();
+                return false;
+            }
+            if((System.currentTimeMillis() - exitTime) > 2000) {
+                WindowManager.showToast(this, getString(R.string.toast_one_more_time_exit));
+                exitTime = System.currentTimeMillis();
+            } else {
+                ActivityManager.finishAllActivity();
+            }
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

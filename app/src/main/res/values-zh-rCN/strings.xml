@@ -15,6 +15,7 @@
     <string name="title_menu_edit">编辑</string>
     <string name="title_menu_view_notes">查看笔记</string>
     <string name="title_menu_delete">删除</string>
+    <string name="title_menu_save">保存</string>
     <string name="title_messagebox_permission_denied">权限被拒绝</string>
     <string name="title_messagebox_select_cover">选取封面</string>
     <string name="title_messagebox_file_exists">文件已存在</string>
@@ -31,6 +32,7 @@
     <string name="text_activity_createfile_clear">清除</string>
     <string name="text_activity_view_mode">查看模式</string>
     <string name="text_activity_edit_mode">编辑模式</string>
+    <string name="text_activity_edit_here">在此处插入文本…</string>
     <string name="text_button_positive_default">确定</string>
     <string name="text_button_negative_default">取消</string>
     <string name="text_button_positive_allow_1">同意</string>
@@ -51,4 +53,6 @@
     <string name="toast_not_allowed_characters">不允许的字符：</string>
     <string name="toast_cannot_input_more_1">不能输入超过</string>
     <string name="toast_cannot_input_more_2">个字符</string>
+    <string name="toast_one_more_time_back">再按一次返回</string>
+    <string name="toast_one_more_time_exit">再按一次退出程序</string>
 </resources>

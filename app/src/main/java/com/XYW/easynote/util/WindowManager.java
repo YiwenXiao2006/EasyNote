@@ -7,7 +7,6 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.widget.Toast;
 
@@ -137,17 +136,14 @@ public class WindowManager {
     public void KeyBoardListen(Context context, Activity activity) {
         //监听软键盘的状态
         View rootLayout = activity.getWindow().getDecorView().findViewById(android.R.id.content);
-        rootLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-            @Override
-            public void onGlobalLayout() {
-                Rect r = new Rect();
-                //获取当前窗口实际的可见区域
-                activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
-                int height = r.height();
-                ViewGroup.LayoutParams params = rootLayout.getLayoutParams();
-                params.height = height + getStatusBarHeight(context, activity);
-                rootLayout.setLayoutParams(params);
-            }
+        rootLayout.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
+            Rect r = new Rect();
+            //获取当前窗口实际的可见区域
+            activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(r);
+            int height = r.height();
+            ViewGroup.LayoutParams params = rootLayout.getLayoutParams();
+            params.height = height + (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP ? 0 : getStatusBarHeight(context, activity));
+            rootLayout.setLayoutParams(params);
         });
     }
 }

@@ -32,6 +32,7 @@
             app:srcCompat="@drawable/img_papertexture" />
 
         <LinearLayout
+            android:id="@+id/LinearLayout_edit_doc"
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
