@@ -55,7 +55,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if(keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (!EditMode) {
+            if (!EditMode && !Edited) {
                 return super.onKeyDown(keyCode, event);
             }
             if((System.currentTimeMillis() - exitTime) > 2000) {
