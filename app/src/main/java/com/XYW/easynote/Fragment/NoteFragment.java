@@ -370,8 +370,8 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
 
     @Override
     public void onHide() {
-        RelativeLayout.LayoutParams FAB_modifyExam_LayoutParams = (RelativeLayout.LayoutParams) FAB_createNote.getLayoutParams();
-        FAB_createNote.animate().translationY(FAB_createNote.getHeight() + FAB_modifyExam_LayoutParams.bottomMargin)
+        RelativeLayout.LayoutParams FAB_LayoutParams = (RelativeLayout.LayoutParams) FAB_createNote.getLayoutParams();
+        FAB_createNote.animate().translationY(FAB_createNote.getHeight() + FAB_LayoutParams.bottomMargin)
                 .setInterpolator(new AccelerateInterpolator(3));
     }
 

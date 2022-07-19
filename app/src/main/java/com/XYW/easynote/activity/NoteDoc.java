@@ -3,12 +3,16 @@ package com.XYW.easynote.activity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,7 +27,9 @@ import com.XYW.easynote.ui.adapter.ListPopupItem;
 import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
 import com.XYW.easynote.util.ActivityManager;
 import com.XYW.easynote.util.IOManager;
+import com.XYW.easynote.util.UIManager;
 import com.XYW.easynote.util.WindowManager;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,17 +38,18 @@ import java.util.Objects;
 
 import jp.wasabeef.richeditor.RichEditor;
 
-public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
+public class NoteDoc extends AppCompatActivity implements View.OnClickListener, UIManager.HideScrollListener {
 
     private static final String TAG = "NoteDoc";
 
     private RichEditor RichEditor_EditDoc;
     private ListPopupWindow ListPopupWindow_NoteDoc_menu;
     private TextView TextView_toolbarTitle;
+    private FloatingActionButton FAB_Save_Note;
     private HorizontalScrollView HorizontalScrollView_EditDoc_Tools;
 
     private String title_File_Theme, file_Path, file_Name, file_End, text_HTML;
-    private boolean EditMode = false;
+    private boolean EditMode = false, Edited = false;
     private long exitTime = 0;
 
     @Override
@@ -55,8 +62,18 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
                 WindowManager.showToast(this, getString(R.string.toast_one_more_time_back));
                 exitTime = System.currentTimeMillis();
             } else {
-                save();
-                finish();
+                new MessageBox.CreateMessageBox.Builder(this)
+                        .setTitle(getString(R.string.title_menu_save))
+                        .setMessage(getString(R.string.massage_save_note))
+                        .setCancelable(true)
+                        .setCanceledOnTouchOutside(true)
+                        .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
+                            save();
+                            finish();
+                        })
+                        .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finish)
+                        .create()
+                        .show();
             }
             return true;
         }
@@ -91,6 +108,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean("EditMode", EditMode);
+        outState.putBoolean("Edited", Edited);
         outState.putString("title", title_File_Theme);
         outState.putString("filePath", file_Path);
         outState.putString("fileName", file_Name);
@@ -168,6 +186,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
         }
         if (bundle != null) {
             EditMode = bundle.getBoolean("EditMode", false);
+            Edited = bundle.getBoolean("Edited", false);
             title_File_Theme = bundle.getString("title", getString(R.string.title_note_doc));
             file_Path = bundle.getString("filePath", null);
             file_Name = bundle.getString("fileName", null);
@@ -181,6 +200,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
         initTextView();
         initImageButton();
         initTextEditor();
+        initFAB();
     }
 
     private void initTextView() {
@@ -209,30 +229,65 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
         imageButton_toolbarDoneButton.setOnClickListener(this);
 
 
+        findViewById(R.id.action_undo).setOnClickListener(v -> {
+            RichEditor_EditDoc.undo();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_undo).setOnClickListener(v -> RichEditor_EditDoc.undo());
+        findViewById(R.id.action_redo).setOnClickListener(v -> {
+            RichEditor_EditDoc.redo();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_redo).setOnClickListener(v -> RichEditor_EditDoc.redo());
+        findViewById(R.id.action_bold).setOnClickListener(v -> {
+            RichEditor_EditDoc.setBold();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_bold).setOnClickListener(v -> RichEditor_EditDoc.setBold());
+        findViewById(R.id.action_italic).setOnClickListener(v -> {
+            RichEditor_EditDoc.setItalic();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_italic).setOnClickListener(v -> RichEditor_EditDoc.setItalic());
+        findViewById(R.id.action_strikethrough).setOnClickListener(v -> {
+            RichEditor_EditDoc.setStrikeThrough();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_strikethrough).setOnClickListener(v -> RichEditor_EditDoc.setStrikeThrough());
+        findViewById(R.id.action_underline).setOnClickListener(v -> {
+            RichEditor_EditDoc.setUnderline();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_underline).setOnClickListener(v -> RichEditor_EditDoc.setUnderline());
+        findViewById(R.id.action_heading1).setOnClickListener(v -> {
+            RichEditor_EditDoc.setHeading(1);
+            Edited = true;
+        });
 
-        findViewById(R.id.action_heading1).setOnClickListener(v -> RichEditor_EditDoc.setHeading(1));
+        findViewById(R.id.action_heading2).setOnClickListener(v -> {
+            RichEditor_EditDoc.setHeading(2);
+            Edited = true;
+        });
 
-        findViewById(R.id.action_heading2).setOnClickListener(v -> RichEditor_EditDoc.setHeading(2));
+        findViewById(R.id.action_heading3).setOnClickListener(v -> {
+            RichEditor_EditDoc.setHeading(3);
+            Edited = true;
+        });
 
-        findViewById(R.id.action_heading3).setOnClickListener(v -> RichEditor_EditDoc.setHeading(3));
+        findViewById(R.id.action_heading4).setOnClickListener(v -> {
+            RichEditor_EditDoc.setHeading(4);
+            Edited = true;
+        });
 
-        findViewById(R.id.action_heading4).setOnClickListener(v -> RichEditor_EditDoc.setHeading(4));
+        findViewById(R.id.action_heading5).setOnClickListener(v -> {
+            RichEditor_EditDoc.setHeading(5);
+            Edited = true;
+        });
 
-        findViewById(R.id.action_heading5).setOnClickListener(v -> RichEditor_EditDoc.setHeading(5));
-
-        findViewById(R.id.action_heading6).setOnClickListener(v -> RichEditor_EditDoc.setHeading(6));
+        findViewById(R.id.action_heading6).setOnClickListener(v -> {
+            RichEditor_EditDoc.setHeading(6);
+            Edited = true;
+        });
 
         findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
             private boolean isChanged;
@@ -241,6 +296,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
             public void onClick(View v) {
                 RichEditor_EditDoc.setTextColor(isChanged ? Color.BLACK : Color.RED);
                 isChanged = !isChanged;
+                Edited = true;
             }
         });
 
@@ -251,35 +307,63 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
             public void onClick(View v) {
                 RichEditor_EditDoc.setTextBackgroundColor(isChanged ? Color.TRANSPARENT : Color.YELLOW);
                 isChanged = !isChanged;
+                Edited = true;
             }
         });
 
-        findViewById(R.id.action_align_left).setOnClickListener(v -> RichEditor_EditDoc.setAlignLeft());
+        findViewById(R.id.action_align_left).setOnClickListener(v -> {
+            RichEditor_EditDoc.setAlignLeft();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_align_center).setOnClickListener(v -> RichEditor_EditDoc.setAlignCenter());
+        findViewById(R.id.action_align_center).setOnClickListener(v -> {
+            RichEditor_EditDoc.setAlignCenter();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_align_right).setOnClickListener(v -> RichEditor_EditDoc.setAlignRight());
+        findViewById(R.id.action_align_right).setOnClickListener(v -> {
+            RichEditor_EditDoc.setAlignRight();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_blockquote).setOnClickListener(v -> RichEditor_EditDoc.setBlockquote());
+        findViewById(R.id.action_blockquote).setOnClickListener(v -> {
+            RichEditor_EditDoc.setBlockquote();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_insert_bullets).setOnClickListener(v -> RichEditor_EditDoc.setBullets());
+        findViewById(R.id.action_insert_bullets).setOnClickListener(v -> {
+            RichEditor_EditDoc.setBullets();
+            Edited = true;
+        });
 
-        findViewById(R.id.action_insert_numbers).setOnClickListener(v -> RichEditor_EditDoc.setNumbers());
+        findViewById(R.id.action_insert_numbers).setOnClickListener(v -> {
+            RichEditor_EditDoc.setNumbers();
+            Edited = true;
+        });
 
         findViewById(R.id.action_insert_image).setOnClickListener(v -> {
             RichEditor_EditDoc.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg", "dachshund", 320);
+            Edited = true;
         });
 
         findViewById(R.id.action_insert_audio).setOnClickListener(v -> {
             RichEditor_EditDoc.insertAudio("https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3");
+            Edited = true;
         });
 
         findViewById(R.id.action_insert_video).setOnClickListener(v -> {
             RichEditor_EditDoc.insertVideo("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4", 360);
+            Edited = true;
         });
 
-        findViewById(R.id.action_insert_link).setOnClickListener(v -> RichEditor_EditDoc.insertLink("https://www.baidu.com/", "Baidu"));
-        findViewById(R.id.action_insert_checkbox).setOnClickListener(v -> RichEditor_EditDoc.insertTodo());
+        findViewById(R.id.action_insert_link).setOnClickListener(v -> {
+            RichEditor_EditDoc.insertLink("https://www.baidu.com/", "Baidu");
+            Edited = true;
+        });
+        findViewById(R.id.action_insert_checkbox).setOnClickListener(v -> {
+            RichEditor_EditDoc.insertTodo();
+            Edited = true;
+        });
     }
 
     private void initTextEditor() {
@@ -312,13 +396,25 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
         if (text_HTML != null && !Objects.equals(text_HTML, "")) {
             RichEditor_EditDoc.setHtml(text_HTML);
         }
-        RichEditor_EditDoc.setOnTextChangeListener(text -> text_HTML = RichEditor_EditDoc.getHtml());
+        RichEditor_EditDoc.setOnTextChangeListener(text -> {
+            text_HTML = RichEditor_EditDoc.getHtml();
+            Edited = true;
+        });
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            RichEditor_EditDoc.setOnScrollChangeListener(new UIManager.ViewScrollListener(this));
+        }
 
         HorizontalScrollView_EditDoc_Tools = findViewById(R.id.HorizontalScrollView_EditDoc_Tools);
         HorizontalScrollView_EditDoc_Tools.setVisibility(EditMode ? View.VISIBLE : View.GONE);
     }
 
+    private void initFAB() {
+        FAB_Save_Note = findViewById(R.id.FAB_Save_Note);
+        FAB_Save_Note.setOnClickListener(this);
+    }
+
     private void save() {
+        Edited = false;
         File data = new File(file_Path, file_Name + "." + file_End);
         if (!IOManager.fileExists(data)) {
             IOManager.createNewFile(data);
@@ -331,8 +427,22 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.ImageButton_toolbarHomeButton:
-                save();
-                finish();
+                if (Edited) {
+                    new MessageBox.CreateMessageBox.Builder(this)
+                            .setTitle(getString(R.string.title_menu_save))
+                            .setMessage(getString(R.string.massage_save_note))
+                            .setCancelable(true)
+                            .setCanceledOnTouchOutside(true)
+                            .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
+                                save();
+                                finish();
+                            })
+                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finish)
+                            .create()
+                            .show();
+                } else {
+                    finish();
+                }
                 break;
             case R.id.ImageButton_toolbarDoneButton:
                 List<ListPopupItem> listPopupItems = new ArrayList<>();
@@ -345,6 +455,21 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
                 listPopupItems.add(new ListPopupItem(getString(R.string.title_menu_delete), R.drawable.edit_delete));
                 showListMenu(view, listPopupItems);
                 break;
+            case R.id.FAB_Save_Note:
+                save();
+                break;
         }
+    }
+
+    @Override
+    public void onHide() {
+        RelativeLayout.LayoutParams FAB_LayoutParams = (RelativeLayout.LayoutParams) FAB_Save_Note.getLayoutParams();
+        FAB_Save_Note.animate().translationY(FAB_Save_Note.getHeight() + FAB_LayoutParams.bottomMargin)
+                .setInterpolator(new AccelerateInterpolator(3));
+    }
+
+    @Override
+    public void onShow() {
+        FAB_Save_Note.animate().translationY(0).setInterpolator(new DecelerateInterpolator(3));
     }
 }

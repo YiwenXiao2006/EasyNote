@@ -2,7 +2,6 @@ package com.XYW.easynote.ui;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +28,10 @@ public class MessageBox {
         void onCancel();
     }
 
+    public interface MessageBoxOnDismissListener {
+        void onDismiss();
+    }
+
     static public class CreateMessageBox extends Dialog {
 
         public CreateMessageBox(@NonNull Context context, int themeResId) {
@@ -49,6 +52,7 @@ public class MessageBox {
             private int numButton = 0;
             private boolean cancelAble = true, canceledOnTouchOutside = true;
             private MessageBoxOnCancelListener onCancelListener;
+            private MessageBoxOnDismissListener onDismissListener;
 
             public Builder(Context context) {
                 this.context = context;
@@ -205,6 +209,11 @@ public class MessageBox {
                 return this;
             }
 
+            public Builder setOnDismissListener(MessageBoxOnDismissListener listener) {
+                onDismissListener = listener;
+                return this;
+            }
+
             public CreateMessageBox create() {
                 if (numButton >= 1) {
                     View_cutLine_Land.setVisibility(View.VISIBLE);
@@ -215,14 +224,18 @@ public class MessageBox {
                 mDialog.setContentView(mLayout);
                 mDialog.setCancelable(cancelAble);                //用户可以点击后退键关闭 Dialog
                 mDialog.setCanceledOnTouchOutside(canceledOnTouchOutside);   //用户不可以点击外部来关闭 Dialog
-                mDialog.setOnCancelListener(new OnCancelListener() {
-                    @Override
-                    public void onCancel(DialogInterface dialogInterface) {
-                        try {
-                            onCancelListener.onCancel();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                mDialog.setOnCancelListener(dialogInterface -> {
+                    try {
+                        onCancelListener.onCancel();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+                mDialog.setOnDismissListener(dialogInterface -> {
+                    try {
+                        onDismissListener.onDismiss();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                 });
                 return mDialog;
