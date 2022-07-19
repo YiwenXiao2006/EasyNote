@@ -329,7 +329,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         });
     }
 
-    private void getTheViewPagerRoll () {
+    private void getTheViewPagerRoll() {
         TimerTask timerTask_Viewpager = new TimerTask() {
             @Override
             public void run() {
@@ -353,7 +353,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
     }
 
     @Override
-    public void onAttach (@NonNull Activity activity){
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         this.activity = activity;
         Hander_viewpager = message -> {
@@ -363,7 +363,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
     }
 
     @Override
-    public void onAttach (@NonNull Context context){
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.context = context;
     }

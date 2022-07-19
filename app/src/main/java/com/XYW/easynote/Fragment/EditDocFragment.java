@@ -38,13 +38,13 @@ public class EditDocFragment extends Fragment {
     }
 
     @Override
-    public void onAttach (@NonNull Activity activity){
+    public void onAttach(@NonNull Activity activity) {
         super.onAttach(activity);
         this.activity = activity;
     }
 
     @Override
-    public void onAttach (@NonNull Context context){
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         this.context = context;
     }
