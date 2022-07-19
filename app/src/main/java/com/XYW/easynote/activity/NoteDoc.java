@@ -2,8 +2,10 @@ package com.XYW.easynote.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -16,38 +18,30 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.XYW.easynote.Fragment.EditDocFragment;
-import com.XYW.easynote.Fragment.ViewDocFragment;
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.MessageBox;
 import com.XYW.easynote.ui.adapter.ListPopupItem;
 import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
 import com.XYW.easynote.util.ActivityManager;
 import com.XYW.easynote.util.IOManager;
-import com.ns.yc.yccustomtextlib.utils.HyperLibUtils;
+import com.XYW.easynote.util.WindowManager;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import jp.wasabeef.richeditor.RichEditor;
+
 public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
 
+    private RichEditor mEditor;
     private ListPopupWindow ListPopupWindow_NoteDoc_menu;
     private TextView TextView_toolbarTitle;
+    private HorizontalScrollView HorizontalScrollView_EditDoc_Tools;
 
     private String title_File_Theme, file_Path, file_Name, file_End;
     private boolean EditMode = false;
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        //判断键盘是否弹出
-        boolean softInputVisible = HyperLibUtils.isSoftInputVisible(this);
-        if (softInputVisible){
-            HyperLibUtils.hideSoftInput(this);
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,14 +95,14 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
                 case 0:
                     String title;
                     if (EditMode) {
-                        changeFragment(new ViewDocFragment(), R.id.FrameLayout_NoteDoc);
                         title = title_File_Theme + " ("  + getString(R.string.text_activity_view_mode) + ")";
                     } else {
-                        changeFragment(new EditDocFragment(), R.id.FrameLayout_NoteDoc);
                         title = title_File_Theme + " ("  + getString(R.string.text_activity_edit_mode) + ")";
                     }
                     TextView_toolbarTitle.setText(title);
                     EditMode = !EditMode;
+                    mEditor.setInputEnabled(EditMode);
+                    HorizontalScrollView_EditDoc_Tools.setVisibility(EditMode ? View.VISIBLE : View.GONE);
                     break;
                 case 1:
                     if (file_Path != null) {
@@ -154,9 +148,13 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
             file_Name = bundle.getString("fileName", null);
             file_End = bundle.getString("fileEnd", null);
         }
+
+        WindowManager windowManager = new WindowManager();
+        windowManager.KeyBoardListen(this, this);
+
         initTextView();
         initImageButton();
-        initFrameLayout();
+        initTextEditor();
     }
 
     private void initTextView() {
@@ -183,14 +181,215 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener {
         imageButton_toolbarDoneButton.setImageDrawable(ContextCompat.getDrawable(NoteDoc.this, R.drawable.interactive_more_vertical));
         imageButton_toolbarDoneButton.setVisibility(View.VISIBLE);
         imageButton_toolbarDoneButton.setOnClickListener(this);
+
+
+
+        findViewById(R.id.action_undo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.undo();
+            }
+        });
+
+        findViewById(R.id.action_redo).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.redo();
+            }
+        });
+
+        findViewById(R.id.action_bold).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setBold();
+            }
+        });
+
+        findViewById(R.id.action_italic).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setItalic();
+            }
+        });
+
+        findViewById(R.id.action_strikethrough).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setStrikeThrough();
+            }
+        });
+
+        findViewById(R.id.action_underline).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setUnderline();
+            }
+        });
+
+        findViewById(R.id.action_heading1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setHeading(1);
+            }
+        });
+
+        findViewById(R.id.action_heading2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setHeading(2);
+            }
+        });
+
+        findViewById(R.id.action_heading3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setHeading(3);
+            }
+        });
+
+        findViewById(R.id.action_heading4).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setHeading(4);
+            }
+        });
+
+        findViewById(R.id.action_heading5).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setHeading(5);
+            }
+        });
+
+        findViewById(R.id.action_heading6).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setHeading(6);
+            }
+        });
+
+        findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
+            private boolean isChanged;
+
+            @Override
+            public void onClick(View v) {
+                mEditor.setTextColor(isChanged ? Color.BLACK : Color.RED);
+                isChanged = !isChanged;
+            }
+        });
+
+        findViewById(R.id.action_bg_color).setOnClickListener(new View.OnClickListener() {
+            private boolean isChanged;
+
+            @Override
+            public void onClick(View v) {
+                mEditor.setTextBackgroundColor(isChanged ? Color.TRANSPARENT : Color.YELLOW);
+                isChanged = !isChanged;
+            }
+        });
+
+        findViewById(R.id.action_align_left).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setAlignLeft();
+            }
+        });
+
+        findViewById(R.id.action_align_center).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setAlignCenter();
+            }
+        });
+
+        findViewById(R.id.action_align_right).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setAlignRight();
+            }
+        });
+
+        findViewById(R.id.action_blockquote).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setBlockquote();
+            }
+        });
+
+        findViewById(R.id.action_insert_bullets).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setBullets();
+            }
+        });
+
+        findViewById(R.id.action_insert_numbers).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.setNumbers();
+            }
+        });
+
+        findViewById(R.id.action_insert_image).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //mEditor.insertImage("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg", "dachshund", 320);
+            }
+        });
+
+        findViewById(R.id.action_insert_audio).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //mEditor.insertAudio("https://file-examples-com.github.io/uploads/2017/11/file_example_MP3_5MG.mp3");
+            }
+        });
+
+        findViewById(R.id.action_insert_video).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //mEditor.insertVideo("https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_10MB.mp4", 360);
+            }
+        });
+
+        findViewById(R.id.action_insert_link).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.insertLink("https://github.com/wasabeef", "wasabeef");
+            }
+        });
+        findViewById(R.id.action_insert_checkbox).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mEditor.insertTodo();
+            }
+        });
     }
 
-    private void initFrameLayout() {
-        if (EditMode) {
-            changeFragment(new EditDocFragment(), R.id.FrameLayout_NoteDoc);
-        } else {
-            changeFragment(new ViewDocFragment(), R.id.FrameLayout_NoteDoc);
-        }
+    private void initTextEditor() {
+        mEditor = (RichEditor) findViewById(R.id.RichEditor_edit);
+
+        //初始化编辑高度
+        mEditor.setEditorHeight(200);
+        //初始化字体大小
+        mEditor.setEditorFontSize(22);
+        //初始化字体颜色
+        mEditor.setEditorFontColor(Color.BLACK);
+        //mEditor.setEditorBackgroundColor(Color.BLUE);
+
+        //初始化内边距
+        mEditor.setPadding(10, 10, 10, 10);
+        //设置编辑框背景，可以是网络图片
+        // mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
+        mEditor.setBackgroundColor(Color.TRANSPARENT);
+        // mEditor.setBackgroundResource(R.drawable.bg);
+        // 设置默认显示语句
+        if (EditMode)
+            mEditor.setPlaceholder("Insert text here...");
+        //设置编辑器是否可用
+        mEditor.setInputEnabled(EditMode);
+
+        HorizontalScrollView_EditDoc_Tools = findViewById(R.id.HorizontalScrollView_EditDoc_Tools);
+        HorizontalScrollView_EditDoc_Tools.setVisibility(EditMode ? View.VISIBLE : View.GONE);
     }
 
     private void changeFragment(Fragment fragment, int frameLayout) {

@@ -31,9 +31,18 @@
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/img_papertexture" />
 
-        <FrameLayout
-            android:id="@+id/FrameLayout_NoteDoc"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent">
+
+            <jp.wasabeef.richeditor.RichEditor
+                android:id="@+id/RichEditor_edit"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
+
+            <include layout="@layout/content_edit_doc_tools" />
+        </LinearLayout>
     </RelativeLayout>
 </LinearLayout>
