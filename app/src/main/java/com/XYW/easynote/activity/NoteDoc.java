@@ -458,6 +458,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                 break;
             case R.id.FAB_Save_Note:
                 save();
+                WindowManager.showToast(this, getString(R.string.toast_savefile_successful));
                 break;
         }
     }

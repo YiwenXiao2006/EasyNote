@@ -57,4 +57,5 @@
     <string name="toast_cannot_input_more_2">character(s)</string>
     <string name="toast_one_more_time_back">Press again to return</string>
     <string name="toast_one_more_time_exit">Press again to exit</string>
+    <string name="toast_savefile_successful">Saved successfully</string>
 </resources>
