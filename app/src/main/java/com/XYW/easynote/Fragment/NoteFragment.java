@@ -667,10 +667,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                 }
                 holder.itemView.setOnClickListener(view -> {
                     Intent intent = new Intent(context, NoteDoc.class);
-                    intent.putExtra("title", note.getTitle());
-                    intent.putExtra("filePath", note.getFile_Path());
-                    intent.putExtra("fileName", note.getFile_Name());
-                    intent.putExtra("fileEnd", note.getFile_End());
+                    intent.putExtra("note", note);
                     intent.putExtra("EditMode", false);
                     intent.putExtra("text_HTML", IOManager.readFile(new File(note.getFile_Path(), note.getFile_Name() + "." + note.getFile_End())));
                     context.startActivity(intent);

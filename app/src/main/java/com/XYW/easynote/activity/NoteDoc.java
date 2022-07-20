@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
@@ -21,7 +23,9 @@ import androidx.appcompat.widget.ListPopupWindow;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.XYW.easynote.Fragment.NoteFragment;
 import com.XYW.easynote.R;
+import com.XYW.easynote.ui.ColorPickerView;
 import com.XYW.easynote.ui.MessageBox;
 import com.XYW.easynote.ui.adapter.ListPopupItem;
 import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
@@ -48,9 +52,13 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
     private FloatingActionButton FAB_Save_Note;
     private HorizontalScrollView HorizontalScrollView_EditDoc_Tools;
 
+    private MessageBox.CreateMessageBox messageBox_loading;
+
     private String title_File_Theme, file_Path, file_Name, file_End, text_HTML;
     private boolean EditMode = false, Edited = false;
+    private static boolean firstOpen = true;
     private long exitTime = 0;
+    private int colorPicker;
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -64,10 +72,10 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                 } else {
                     new MessageBox.CreateMessageBox.Builder(this)
                             .setTitle(getString(R.string.title_menu_save))
-                            .setMessage(getString(R.string.massage_save_note))
+                            .setMessage(getString(R.string.message_save_note))
                             .setCancelable(true)
                             .setCanceledOnTouchOutside(true)
-                            .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
+                            .setPositiveButton(getString(R.string.text_button_positive_save), () -> {
                                 save();
                                 finish();
                             })
@@ -178,12 +186,23 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
 
     private void init(Intent intent, Bundle bundle) {
         if (intent != null) {
+            NoteFragment.Note note = intent.getParcelableExtra("note");
+            file_Path = note.getFile_Path();
+            file_Name = note.getFile_Name();
+            file_End = note.getFile_End();
+            title_File_Theme = note.getTitle();
             EditMode = intent.getBooleanExtra("EditMode", false);
-            title_File_Theme = intent.getStringExtra("title");
-            file_Path = intent.getStringExtra("filePath");
-            file_Name = intent.getStringExtra("fileName");
-            file_End = intent.getStringExtra("fileEnd");
             text_HTML = intent.getStringExtra("text_HTML");
+
+            if (firstOpen) {
+                messageBox_loading = new MessageBox.CreateMessageBox.Builder(this)
+                        .setProgressbar(true)
+                        .setMessage(getString(R.string.message_loading_default))
+                        .setCancelable(false)
+                        .setCanceledOnTouchOutside(false)
+                        .create();
+                firstOpen = false;
+            }
         }
         if (bundle != null) {
             EditMode = bundle.getBoolean("EditMode", false);
@@ -290,26 +309,28 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
             Edited = true;
         });
 
-        findViewById(R.id.action_txt_color).setOnClickListener(new View.OnClickListener() {
-            private boolean isChanged;
-
-            @Override
-            public void onClick(View v) {
-                RichEditor_EditDoc.setTextColor(isChanged ? Color.BLACK : Color.RED);
-                isChanged = !isChanged;
-                Edited = true;
-            }
+        findViewById(R.id.action_txt_color).setOnClickListener(v -> {
+            new MessageBox.CreateMessageBox.Builder(NoteDoc.this)
+                    .setCancelable(true)
+                    .setCancelable(true)
+                    .addView(initColorPicker())
+                    .setPositiveButton(getString(R.string.text_button_positive_default), () -> RichEditor_EditDoc.setTextColor(colorPicker))
+                    .setNegativeButton(getString(R.string.text_button_negative_default), null)
+                    .create()
+                    .show();
+            Edited = true;
         });
 
-        findViewById(R.id.action_bg_color).setOnClickListener(new View.OnClickListener() {
-            private boolean isChanged;
-
-            @Override
-            public void onClick(View v) {
-                RichEditor_EditDoc.setTextBackgroundColor(isChanged ? Color.TRANSPARENT : Color.YELLOW);
-                isChanged = !isChanged;
-                Edited = true;
-            }
+        findViewById(R.id.action_bg_color).setOnClickListener(v -> {
+            new MessageBox.CreateMessageBox.Builder(NoteDoc.this)
+                    .setCancelable(true)
+                    .setCancelable(true)
+                    .addView(initColorPicker())
+                    .setPositiveButton(getString(R.string.text_button_positive_default), () -> RichEditor_EditDoc.setTextBackgroundColor(colorPicker))
+                    .setNegativeButton(getString(R.string.text_button_negative_default), null)
+                    .create()
+                    .show();
+            Edited = true;
         });
 
         findViewById(R.id.action_align_left).setOnClickListener(v -> {
@@ -367,6 +388,32 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         });
     }
 
+    private View initColorPicker() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.dialog_colorpicker, null);
+        ColorPickerView picker = view.findViewById(R.id.ColorPickerView_color_picker);
+        colorPicker = -16711861;
+        view.findViewById(R.id.View_color_picker).setBackgroundColor(colorPicker);
+        picker.setOnColorPickerChangeListener(new ColorPickerView.OnColorPickerChangeListener() {
+            @Override
+            public void onColorChanged(ColorPickerView picker, int color) {
+                colorPicker = color;
+                view.findViewById(R.id.View_color_picker).setBackgroundColor(color);
+            }
+
+            @Override
+            public void onStartTrackingTouch(ColorPickerView picker) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(ColorPickerView picker) {
+
+            }
+        });
+        return view;
+    }
+
     private void initTextEditor() {
         RichEditor_EditDoc = (RichEditor) findViewById(R.id.RichEditor_edit);
 
@@ -379,7 +426,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
             }
         });
         //初始化字体大小
-        RichEditor_EditDoc.setEditorFontSize(22);
+        RichEditor_EditDoc.setEditorFontSize(16);
         //初始化字体颜色
         RichEditor_EditDoc.setEditorFontColor(Color.BLACK);
         //mEditor.setEditorBackgroundColor(Color.BLUE);
@@ -389,11 +436,17 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         //设置编辑框背景，可以是网络图片
         // mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         RichEditor_EditDoc.setBackgroundColor(Color.TRANSPARENT);
+        RichEditor_EditDoc.setOnInitialLoadListener(isReady -> new Handler().postDelayed(() -> {
+            if (messageBox_loading != null) {
+                messageBox_loading.dismiss();
+            }
+        }, 500));
         // 设置默认显示语句
         if (EditMode)
             RichEditor_EditDoc.setPlaceholder(getString(R.string.text_activity_edit_here));
         //设置编辑器是否可用
         RichEditor_EditDoc.setInputEnabled(EditMode);
+        RichEditor_EditDoc.clearFocusEditor();
         if (text_HTML != null && !Objects.equals(text_HTML, "")) {
             RichEditor_EditDoc.setHtml(text_HTML);
         }
@@ -403,6 +456,9 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         });
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             RichEditor_EditDoc.setOnScrollChangeListener(new UIManager.ViewScrollListener(this));
+        }
+        if (messageBox_loading != null) {
+            messageBox_loading.show();
         }
 
         HorizontalScrollView_EditDoc_Tools = findViewById(R.id.HorizontalScrollView_EditDoc_Tools);
@@ -431,10 +487,10 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                 if (Edited) {
                     new MessageBox.CreateMessageBox.Builder(this)
                             .setTitle(getString(R.string.title_menu_save))
-                            .setMessage(getString(R.string.massage_save_note))
+                            .setMessage(getString(R.string.message_save_note))
                             .setCancelable(true)
                             .setCanceledOnTouchOutside(true)
-                            .setPositiveButton(getString(R.string.text_button_positive_default), () -> {
+                            .setPositiveButton(getString(R.string.text_button_positive_save), () -> {
                                 save();
                                 finish();
                             })

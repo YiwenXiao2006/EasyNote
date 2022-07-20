@@ -40,13 +40,15 @@
     <string name="text_button_negative_deny">Deny</string>
     <string name="text_button_positive_camera">Camera</string>
     <string name="text_button_negative_album">Album</string>
+    <string name="text_button_positive_save">Save</string>
     <string name="text_button_negative_donot_save">Do not save</string>
     <string name="message_exit">Are you sure you want to exit?</string>
     <string name="message_select_cover">Choose a way to select the cover</string>
     <string name="message_clear_cover">Clear the cover?</string>
     <string name="message_file_exists">The file already exists, do you need to delete the old file? Or try changing the theme</string>
     <string name="message_delete_note">Confirm to delete</string>
-    <string name="massage_save_note">Save notes?</string>
+    <string name="message_save_note">Save notes?</string>
+    <string name="message_loading_default">Loading…</string>
     <string name="message_permission_denied_storage_1">Forbidding read-write permission will cause the data to be unable to be saved normally. \nClick \"Allow\" to use it!</string>
     <string name="message_permission_denied_storage_2">Forbidding read-write permission will cause the data to be unable to be saved normally. You seem to have chosen not to ask again, you need to go to the setting to allow this permission.</string>
     <string name="message_permission_denied_camera_1">Allow camera access to shoot photo properly. \nClick \"Allow\" to use it!</string>

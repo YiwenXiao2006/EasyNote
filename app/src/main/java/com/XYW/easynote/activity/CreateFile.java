@@ -328,10 +328,8 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
         LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
 
         intent = new Intent(CreateFile.this, NoteDoc.class);
-        intent.putExtra("title", theme);
-        intent.putExtra("filePath", file_Path);
-        intent.putExtra("fileName", file_Name);
-        intent.putExtra("fileEnd", file_End);
+        NoteFragment.Note note = new NoteFragment.Note(file_Path, file_Name, file_End, theme, describePath);
+        intent.putExtra("note", note);
         intent.putExtra("EditMode", true);
         intent.putExtra("text_HTML", "");
         startActivity(intent);
