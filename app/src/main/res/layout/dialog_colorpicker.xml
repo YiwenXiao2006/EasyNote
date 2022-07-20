@@ -13,6 +13,7 @@
         android:layout_height="45dp"
         android:layout_margin="5dp"/>
 
+
     <com.XYW.easynote.ui.ColorPickerView
         android:id="@+id/ColorPickerView_color_picker"
         android:layout_width="match_parent"

@@ -68,6 +68,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                 exitTime = System.currentTimeMillis();
             } else {
                 if (!Edited) {
+                    firstOpen = true;
                     return super.onKeyDown(keyCode, event);
                 } else {
                     new MessageBox.CreateMessageBox.Builder(this)
@@ -77,9 +78,13 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                             .setCanceledOnTouchOutside(true)
                             .setPositiveButton(getString(R.string.text_button_positive_save), () -> {
                                 save();
+                                firstOpen = true;
                                 finish();
                             })
-                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finish)
+                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), () -> {
+                                firstOpen = true;
+                                finish();
+                            })
                             .create()
                             .show();
                 }
@@ -171,6 +176,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
 
                                     Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
                                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+                                    firstOpen = true;
                                     finish();
                                 })
                                 .setNegativeButton(getString(R.string.text_button_negative_default), null)
@@ -276,6 +282,16 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
 
         findViewById(R.id.action_underline).setOnClickListener(v -> {
             RichEditor_EditDoc.setUnderline();
+            Edited = true;
+        });
+
+        findViewById(R.id.action_subscript).setOnClickListener(v -> {
+            RichEditor_EditDoc.setSubscript();
+            Edited = true;
+        });
+
+        findViewById(R.id.action_superscript).setOnClickListener(v -> {
+            RichEditor_EditDoc.setSuperscript();
             Edited = true;
         });
 
@@ -398,7 +414,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
             @Override
             public void onColorChanged(ColorPickerView picker, int color) {
                 colorPicker = color;
-                view.findViewById(R.id.View_color_picker).setBackgroundColor(color);
+                view.findViewById(R.id.View_color_picker).setBackgroundColor(colorPicker);
             }
 
             @Override
@@ -492,12 +508,17 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                             .setCanceledOnTouchOutside(true)
                             .setPositiveButton(getString(R.string.text_button_positive_save), () -> {
                                 save();
+                                firstOpen = true;
                                 finish();
                             })
-                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finish)
+                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), () -> {
+                                firstOpen = true;
+                                finish();
+                            })
                             .create()
                             .show();
                 } else {
+                    firstOpen = true;
                     finish();
                 }
                 break;

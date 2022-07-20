@@ -11,6 +11,7 @@
     <color name="subtext">#757575</color>
     <color name="gray">#CCCCCC</color>
     <color name="cutline">#EEEEEE</color>
+    <color name="transparent">#03FFFFFF</color>
 
     <color name="ivory">#FFFFF0</color><!--象牙色-->
     <color name="lightyellow">#FFFFE0</color><!--亮黄色-->

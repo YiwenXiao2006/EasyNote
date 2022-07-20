@@ -324,16 +324,16 @@ public class ColorPickerView extends View {
 
     public int[] createDefaultColorTable() {
         if (mBlackEnable) {
-            return new int[] {
-                    Color.rgb(0, 0, 0),
-                    Color.rgb(255, 0, 0),
-                    Color.rgb(255, 255, 0),
-                    Color.rgb(0, 255, 0),
-                    Color.rgb(0, 255, 255),
-                    Color.rgb(0, 0, 255),
-                    Color.rgb(255, 0, 255),
-                    Color.rgb(255, 0, 0),
-            };
+        return new int[] {
+                Color.rgb(0, 0, 0),
+                Color.rgb(255, 0, 0),
+                Color.rgb(255, 255, 0),
+                Color.rgb(0, 255, 0),
+                Color.rgb(0, 255, 255),
+                Color.rgb(0, 0, 255),
+                Color.rgb(255, 0, 255),
+                Color.rgb(255, 255, 255),
+        };
         } else {
             return new int[] {
                     Color.rgb(255, 0, 0),
