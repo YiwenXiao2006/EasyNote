@@ -95,7 +95,6 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         NoteFragment_Layout = view;
         this.container = container;
-        Log.d(TAG, "onCreateView:ddd " + new File("/data/user/0/com.XYW.easynote/files/Notes/1/1.note").exists());
         init(view);
         return view;
     }

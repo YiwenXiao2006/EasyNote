@@ -165,8 +165,6 @@ public class IOManager {
         return file.exists();
     }
 
-
-
     /**
      * 创建保存图片的文件
      */

@@ -40,7 +40,7 @@
         </activity>
 
         <provider
-            android:name=".util.IOManager$fileProvider"
+            android:name="com.XYW.easynote.util.IOManager$fileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:grantUriPermissions="true"
             android:exported="false">

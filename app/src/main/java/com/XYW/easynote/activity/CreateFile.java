@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.net.Uri;
 import android.os.Build;
@@ -33,8 +34,12 @@ import com.XYW.easynote.util.PermissionManager;
 import com.XYW.easynote.util.UIManager;
 import com.XYW.easynote.util.WindowManager;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -126,9 +131,24 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
         Layout_content_createfile_selecimage.setVisibility(View.GONE);
         Layout_content_create_notecover.setVisibility(View.VISIBLE);
         TextView_createFile_clearcover.setVisibility(View.VISIBLE);
-        ImageView_noteCover.setImageURI(uri);
         coverPath = new File(getExternalCacheDir(), "tempCover.jpg").getPath();
-        IOManager.writeFileWithUri(this, uri, coverPath);
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(coverPath));
+            InputStream inputStream = getContentResolver().openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            if (bitmap.compress(Bitmap.CompressFormat.JPEG, 80, bos)) { // 将质量压缩至80%
+                bos.flush();
+            } else {
+                IOManager.writeFileWithUri(this, uri, coverPath);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            IOManager.writeFileWithUri(this, uri, coverPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            IOManager.writeFileWithUri(this, uri, coverPath);
+        }
+        ImageView_noteCover.setImageBitmap(IOManager.decodeBitmap(this, coverPath, 1920, 1080));
     }
 
     private void init(Bundle bundle) {
