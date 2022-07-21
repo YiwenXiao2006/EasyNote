@@ -34,7 +34,7 @@
                 android:id="@+id/RoundImageView_userHead"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                app:radius="10dp"
+                app:riv_radius="10dp"
                 app:srcCompat="@drawable/icon_sharp" />
 
             <TextView

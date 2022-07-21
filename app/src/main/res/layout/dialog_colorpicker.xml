@@ -7,11 +7,12 @@
     android:padding="10dp"
     android:gravity="center">
 
-    <View
+    <com.XYW.easynote.ui.ColorView
         android:id="@+id/View_color_picker"
-        android:layout_width="45dp"
+        android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:layout_margin="5dp"/>
+        android:layout_margin="5dp"
+        app:cv_shape="circle" />
 
 
     <com.XYW.easynote.ui.ColorPickerView

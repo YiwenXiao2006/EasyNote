@@ -10,6 +10,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
@@ -24,6 +27,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.ListPopupWindow;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -36,7 +40,10 @@ import com.XYW.easynote.R;
 import com.XYW.easynote.activity.CreateFile;
 import com.XYW.easynote.activity.NoteDoc;
 import com.XYW.easynote.ui.DetailViewPager;
+import com.XYW.easynote.ui.MessageBox;
 import com.XYW.easynote.ui.RoundImageView;
+import com.XYW.easynote.ui.adapter.ListPopupItem;
+import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
 import com.XYW.easynote.util.IOManager;
 import com.XYW.easynote.util.UIManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -617,6 +624,10 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
 
             private final List<Note> mNotes;
             private final Context context;
+            private ListPopupWindow ListPopupWindow_NoteFragment_menu;
+            private String newName;
+            private TextView TextView_dialog_file_exists;
+            private MessageBox.CreateMessageBox.Builder Rename;
 
             static class ViewHolder extends RecyclerView.ViewHolder {
 
@@ -655,7 +666,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                         @Override
                         public void onGlobalLayout() {
                             holder.RoundImageView_noteImg.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            holder.RoundImageView_noteImg.setImageBitmap(IOManager.decodeBitmap(note.getBackground_Path(),
+                            holder.RoundImageView_noteImg.setImageBitmap(IOManager.decodeBitmap(context, note.getBackground_Path(),
                                     holder.RoundImageView_noteImg.getWidth(), holder.RoundImageView_noteImg.getHeight()));
                         }
                     });
@@ -665,6 +676,15 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                 } else {
                     holder.RoundImageView_noteIcon.setImageResource(R.drawable.general_drive_file);
                 }
+
+                holder.itemView.setOnLongClickListener(view -> {
+                    List<ListPopupItem> listPopupItems = new ArrayList<>();
+                    listPopupItems.add(new ListPopupItem(context.getString(R.string.title_menu_rename), R.drawable.general_pen));
+                    listPopupItems.add(new ListPopupItem(context.getString(R.string.title_menu_delete), R.drawable.edit_delete));
+                    showListMenu(holder.RoundImageView_noteImg, listPopupItems, note);
+                    return true; // 拦截点击事件
+                });
+
                 holder.itemView.setOnClickListener(view -> {
                     Intent intent = new Intent(context, NoteDoc.class);
                     intent.putExtra("note", note);
@@ -677,6 +697,109 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
             @Override
             public int getItemCount() {
                 return this.mNotes.size();
+            }
+
+            private ListPopupWindow createListPopupWindow(View anchor, List<ListPopupItem> items) {
+                final ListPopupWindow popup = new ListPopupWindow(context);
+                ListPopupWindowAdapter adapter = new ListPopupWindowAdapter(items);
+                popup.setAnchorView(anchor);
+                popup.setWidth(context.getResources().getDimensionPixelSize(R.dimen.popupmenu_width_small));
+                popup.setAdapter(adapter);
+                return popup;
+            }
+
+            // Call this when you want to show the ListPopupWindow
+            @SuppressLint("NonConstantResourceId")
+            private void showListMenu(View anchor, List<ListPopupItem> listPopupItems, Note note) {
+                ListPopupWindow_NoteFragment_menu = createListPopupWindow(anchor, listPopupItems);
+                ListPopupWindow_NoteFragment_menu.setOnItemClickListener((adapterView, view, i, l) -> {
+                    switch (i) {
+                        case 0:
+                            newName = "";
+                            Rename = new MessageBox.CreateMessageBox.Builder(context)
+                                    .setTitle(context.getString(R.string.title_menu_rename))
+                                    .addView(dialog_file_exists())
+                                    .addView(dialog_edittext())
+                                    .setIcon(R.drawable.general_pen)
+                                    .setCancelable(true)
+                                    .setCanceledOnTouchOutside(true)
+                                    .setPositiveButton(context.getString(R.string.text_button_positive_default), () -> {
+                                        if (!Objects.equals(newName, "")) {
+                                            Log.d(TAG, "showListMenu: ");
+                                        }
+                                    })
+                                    .setNegativeButton(context.getString(R.string.text_button_negative_default), null);
+                            Rename.setPositiveButtonEnable(false);
+                            Rename.create().show();
+                            break;
+                        case 1:
+                            new MessageBox.CreateMessageBox.Builder(context)
+                                    .setTitle(context.getString(R.string.title_messagebox_delete))
+                                    .setMessage(context.getString(R.string.message_delete_note) + " \"" + note.getTitle() + "\"?")
+                                    .setIcon(R.drawable.edit_delete)
+                                    .setCancelable(true)
+                                    .setCanceledOnTouchOutside(true)
+                                    .setPositiveButton(context.getString(R.string.text_button_positive_default), () -> {
+                                        File file = new File(note.getFile_Path());
+                                        IOManager.deleteDir(file);
+
+                                        IOManager.deleteNoteInCtt(context, note.getTitle());
+
+                                        Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
+                                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                                    })
+                                    .setNegativeButton(context.getString(R.string.text_button_negative_default), null)
+                                    .create()
+                                    .show();
+                            break;
+                    }
+                    ListPopupWindow_NoteFragment_menu.dismiss();
+                }); // the callback for when a list item is selected
+                ListPopupWindow_NoteFragment_menu.show();
+            }
+
+            private View dialog_edittext() {
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View view = inflater.inflate(R.layout.dialog_edittext, null);
+                char[] filter = new char[]{'<', '>'};
+                EditText editText = view.findViewById(R.id.EditText_dialog_edittext);
+                editText.addTextChangedListener(new UIManager.TextWatcher(filter, editText, context));
+                editText.setFilters(new UIManager.TextFilter[]{new UIManager.TextFilter(context, 20)});
+                editText.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        String text = editable.toString();
+                        newName = !text.equals("") ? text : "";
+                        if (IOManager.checkNoteInCtt(context, newName)) {
+                            TextView_dialog_file_exists.setVisibility(View.VISIBLE);
+                            Rename.setPositiveButtonEnable(false);
+                        } else if (editable.length() < 1) {
+                            Rename.setPositiveButtonEnable(false);
+                        } else {
+                            Rename.setPositiveButtonEnable(true);
+                            TextView_dialog_file_exists.setVisibility(View.GONE);
+                        }
+                    }
+                });
+                return view;
+            }
+
+            private View dialog_file_exists() {
+                LayoutInflater inflater = LayoutInflater.from(context);
+                View view = inflater.inflate(R.layout.dialog_file_exists, null);
+                TextView_dialog_file_exists = view.findViewById(R.id.TextView_dialog_file_exists);
+                TextView_dialog_file_exists.setVisibility(View.GONE);
+                return view;
             }
         }
     }

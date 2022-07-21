@@ -16,6 +16,7 @@
     <string name="title_menu_view_notes">查看笔记</string>
     <string name="title_menu_delete">删除</string>
     <string name="title_menu_save">保存</string>
+    <string name="title_menu_rename">重命名</string>
     <string name="title_messagebox_permission_denied">权限被拒绝</string>
     <string name="title_messagebox_select_cover">选取封面</string>
     <string name="title_messagebox_file_exists">文件已存在</string>
@@ -42,6 +43,7 @@
     <string name="text_button_negative_album">相册</string>
     <string name="text_button_positive_save">保存</string>
     <string name="text_button_negative_donot_save">不保存</string>
+    <string name="text_dialog_file_exists">*以该主题命名的文件已存在</string>
     <string name="message_exit">确定要退出吗？</string>
     <string name="message_select_cover">选择一个方式来选取封面</string>
     <string name="message_clear_cover">是否清除封面？</string>

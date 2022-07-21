@@ -3,7 +3,7 @@
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="toolbar_height">50dp</dimen>
     <declare-styleable name="RoundImageView">
-        <attr name="radius" format="dimension"/>
+        <attr name="riv_radius" format="dimension"/>
     </declare-styleable>
     <declare-styleable name="ColorPickerView">
         <attr name="indicatorColor" format="color" /><!--指示点颜色-->
@@ -14,7 +14,19 @@
             <enum name="vertical" value="1" />
         </attr>
     </declare-styleable>
-    <dimen name="popupmenu_width">200dp</dimen>
+    <declare-styleable name="ColorView">
+        <attr name="cv_color" format="color" />
+        <attr name="cv_shape" format="integer">
+            <enum name="circle" value="0" />
+            <enum name="rectangle" value="1" />
+            <enum name="crop_rectangle" value="2" />
+            <enum name="square" value="3" />
+        </attr>
+        <attr name="cv_radius" format="dimension" />
+    </declare-styleable>
+    <dimen name="popupmenu_width_normal">200dp</dimen>
+    <dimen name="popupmenu_width_small">168.75dp</dimen>
+    <dimen name="edit_doc_tools">42dp</dimen>
     <dimen name="text_title_size">18sp</dimen>
     <dimen name="edittext_size">16sp</dimen>
 </resources>

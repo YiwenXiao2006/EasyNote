@@ -113,7 +113,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
                         uri = IOManager.imageFromCamera.getImageUriFromCamera();
                     } else {
                         // 使用图片路径加载
-                        Bitmap bitmap = IOManager.decodeBitmap(IOManager.imageFromCamera.getImagePathFromCamera(), 1920, 1080);
+                        Bitmap bitmap = IOManager.decodeBitmap(this, IOManager.imageFromCamera.getImagePathFromCamera(), 1920, 1080);
                         uri = Uri.parse(MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, null,null));
                     }
                     saveCover(uri);
@@ -152,7 +152,7 @@ public class CreateFile extends AppCompatActivity implements View.OnClickListene
             Layout_content_createfile_selecimage.setVisibility(View.GONE);
             Layout_content_create_notecover.setVisibility(View.VISIBLE);
             TextView_createFile_clearcover.setVisibility(View.VISIBLE);
-            ImageView_noteCover.setImageBitmap(IOManager.decodeBitmap(coverPath, 1920, 1080));
+            ImageView_noteCover.setImageBitmap(IOManager.decodeBitmap(this, coverPath, 1920, 1080));
         }
     }
 

@@ -58,7 +58,11 @@ public class MessageBox {
                 this.context = context;
 
                 if (mDialog != null && mDialog.isShowing()) {
-                    mDialog.dismiss();
+                    try {
+                        mDialog.dismiss();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 mDialog = new CreateMessageBox(context, R.style.Theme_AppCompat_Dialog);
@@ -212,6 +216,14 @@ public class MessageBox {
             public Builder setOnDismissListener(MessageBoxOnDismissListener listener) {
                 onDismissListener = listener;
                 return this;
+            }
+
+            public void setPositiveButtonEnable(boolean enable) {
+                Button_positive.setEnabled(enable);
+            }
+
+            public void setNegativeButtonEnable(boolean enable) {
+                Button_negative.setEnabled(enable);
             }
 
             public CreateMessageBox create() {

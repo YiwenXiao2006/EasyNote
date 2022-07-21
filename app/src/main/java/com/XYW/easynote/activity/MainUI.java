@@ -225,7 +225,7 @@ public class MainUI extends AppCompatActivity {
         final ListPopupWindow popup = new ListPopupWindow(this);
         ListPopupWindowAdapter adapter = new ListPopupWindowAdapter(items);
         popup.setAnchorView(anchor);
-        popup.setWidth(getResources().getDimensionPixelSize(R.dimen.popupmenu_width));
+        popup.setWidth(getResources().getDimensionPixelSize(R.dimen.popupmenu_width_normal));
         popup.setAdapter(adapter);
         return popup;
     }

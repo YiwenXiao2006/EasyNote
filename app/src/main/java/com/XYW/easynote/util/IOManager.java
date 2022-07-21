@@ -6,11 +6,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.os.EnvironmentCompat;
 
@@ -343,13 +346,19 @@ public class IOManager {
      * @param requestHeight 所需高度
      */
 
-    public static Bitmap decodeBitmap(String filePath, int requestWidth, int requestHeight) {
+    public static Bitmap decodeBitmap(Context context, String filePath, int requestWidth, int requestHeight) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;  //第一次解析图片原始宽高信息，不会真正去加载图片
         BitmapFactory.decodeFile(filePath, options);
         options.inSampleSize = calculateInSampleSize(options, requestWidth, requestHeight);  //计算采样率inSampleSize
         options.inJustDecodeBounds = false;  //第二次解析图片，真正加载图片
-        return BitmapFactory.decodeFile(filePath, options);
+        try {
+            return BitmapFactory.decodeFile(filePath, options);
+        } catch (OutOfMemoryError e) {
+            Drawable drawable = ContextCompat.getDrawable(context, R.drawable.img_note_cannot_load_cover);
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            return bitmapDrawable != null ? bitmapDrawable.getBitmap() : null;
+        }
     }
 
     /**
@@ -468,6 +477,51 @@ public class IOManager {
             }
             if (c) {
                 continue;
+            }
+            str.append(IOManager.NOTE_ENDTAG + '\n');
+            IOManager.writeFile(Notes_Contents, str.toString(), true);
+        }
+    }
+
+    public static boolean checkNoteInCtt(Context context, String name) {
+        File Notes_Contents = new File(context.getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
+        List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(context, Notes_Contents));
+
+        for (int i = 0; i < Tags.size(); i++) {
+            for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
+                if (Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), name)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public static void renameNoteInCtt(Context context, String oldName, String newName) {
+        File Notes_Contents = new File(context.getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
+        List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(context, Notes_Contents));
+
+        IOManager.writeFile(Notes_Contents, "#EasyNote\n" +
+                ActivityManager.getAppVersionCode(context) + '\n', false);
+
+        for (int i = 0; i < Tags.size(); i++) {
+            StringBuilder str = new StringBuilder();
+            str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
+            for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
+                str.append(IOManager.NOTE_NOTE + '\n');
+                str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
+                str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
+                str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
+                if (!Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), oldName)) {
+                    str.append(Tags.get(i).getNotes().get(j).getTitle()).append('\n');
+                } else {
+                    str.append(newName).append('\n');
+                }
+                str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
+                str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
+                str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
+                str.append(IOManager.NOTE_ENDNOTE + '\n');
             }
             str.append(IOManager.NOTE_ENDTAG + '\n');
             IOManager.writeFile(Notes_Contents, str.toString(), true);

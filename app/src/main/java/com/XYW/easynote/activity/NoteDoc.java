@@ -1,7 +1,10 @@
 package com.XYW.easynote.activity;
 
 import android.annotation.SuppressLint;
+import android.app.UiModeManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +29,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import com.XYW.easynote.Fragment.NoteFragment;
 import com.XYW.easynote.R;
 import com.XYW.easynote.ui.ColorPickerView;
+import com.XYW.easynote.ui.ColorView;
 import com.XYW.easynote.ui.MessageBox;
 import com.XYW.easynote.ui.adapter.ListPopupItem;
 import com.XYW.easynote.ui.adapter.ListPopupWindowAdapter;
@@ -56,7 +60,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
 
     private String title_File_Theme, file_Path, file_Name, file_End, text_HTML;
     private boolean EditMode = false, Edited = false;
-    private static boolean firstOpen = true;
+    private static boolean firstOpen = true, recreate = false;
     private long exitTime = 0;
     private int colorPicker;
 
@@ -69,6 +73,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
             } else {
                 if (!Edited) {
                     firstOpen = true;
+                    recreate = false;
                     return super.onKeyDown(keyCode, event);
                 } else {
                     new MessageBox.CreateMessageBox.Builder(this)
@@ -78,13 +83,9 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                             .setCanceledOnTouchOutside(true)
                             .setPositiveButton(getString(R.string.text_button_positive_save), () -> {
                                 save();
-                                firstOpen = true;
-                                finish();
+                                finishActivity();
                             })
-                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), () -> {
-                                firstOpen = true;
-                                finish();
-                            })
+                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finishActivity)
                             .create()
                             .show();
                 }
@@ -116,6 +117,9 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
     protected void onDestroy() {
         super.onDestroy();
         ActivityManager.removeActivity(this);
+        if (messageBox_loading != null) {
+            messageBox_loading.dismiss();
+        }
     }
 
     @Override
@@ -134,7 +138,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         final ListPopupWindow popup = new ListPopupWindow(this);
         ListPopupWindowAdapter adapter = new ListPopupWindowAdapter(items);
         popup.setAnchorView(anchor);
-        popup.setWidth(getResources().getDimensionPixelSize(R.dimen.popupmenu_width));
+        popup.setWidth(getResources().getDimensionPixelSize(R.dimen.popupmenu_width_normal));
         popup.setAdapter(adapter);
         return popup;
     }
@@ -176,8 +180,7 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
 
                                     Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
                                     LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
-                                    firstOpen = true;
-                                    finish();
+                                    finishActivity();
                                 })
                                 .setNegativeButton(getString(R.string.text_button_negative_default), null)
                                 .create()
@@ -207,7 +210,22 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                         .setCancelable(false)
                         .setCanceledOnTouchOutside(false)
                         .create();
-                firstOpen = false;
+                if (recreate) {
+                    firstOpen = false;
+                } else {
+                    UiModeManager uiModeManager = (UiModeManager) getSystemService(UI_MODE_SERVICE);
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        firstOpen = false;
+                    } else {
+                        SharedPreferences preferences = getSharedPreferences("Settings", Context.MODE_MULTI_PROCESS);
+                        boolean darkMode = preferences.getBoolean("darkMode", false);
+                        if (uiModeManager.getNightMode() == UiModeManager.MODE_NIGHT_NO && darkMode) {
+                            recreate = true;
+                        } else {
+                            firstOpen = false;
+                        }
+                    }
+                }
             }
         }
         if (bundle != null) {
@@ -408,13 +426,14 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.dialog_colorpicker, null);
         ColorPickerView picker = view.findViewById(R.id.ColorPickerView_color_picker);
+        ColorView colorView = view.findViewById(R.id.View_color_picker);
         colorPicker = -16711861;
-        view.findViewById(R.id.View_color_picker).setBackgroundColor(colorPicker);
+        colorView.setColor(colorPicker);
         picker.setOnColorPickerChangeListener(new ColorPickerView.OnColorPickerChangeListener() {
             @Override
             public void onColorChanged(ColorPickerView picker, int color) {
                 colorPicker = color;
-                view.findViewById(R.id.View_color_picker).setBackgroundColor(colorPicker);
+                colorView.setColor(color);
             }
 
             @Override
@@ -453,8 +472,12 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         // mEditor.setBackground("https://raw.githubusercontent.com/wasabeef/art/master/chip.jpg");
         RichEditor_EditDoc.setBackgroundColor(Color.TRANSPARENT);
         RichEditor_EditDoc.setOnInitialLoadListener(isReady -> new Handler().postDelayed(() -> {
-            if (messageBox_loading != null) {
-                messageBox_loading.dismiss();
+            if (!NoteDoc.this.isFinishing() && messageBox_loading != null && messageBox_loading.isShowing()) {
+                try {
+                    messageBox_loading.dismiss();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }, 500));
         // 设置默认显示语句
@@ -473,8 +496,12 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             RichEditor_EditDoc.setOnScrollChangeListener(new UIManager.ViewScrollListener(this));
         }
-        if (messageBox_loading != null) {
-            messageBox_loading.show();
+        if (!NoteDoc.this.isFinishing() && messageBox_loading != null && !messageBox_loading.isShowing()) {
+            try {
+                messageBox_loading.show();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         HorizontalScrollView_EditDoc_Tools = findViewById(R.id.HorizontalScrollView_EditDoc_Tools);
@@ -495,6 +522,12 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
         IOManager.writeFile(data, text_HTML, false);
     }
 
+    private void finishActivity() {
+        firstOpen = true;
+        recreate = false;
+        finish();
+    }
+
     @SuppressLint("NonConstantResourceId")
     @Override
     public void onClick(View view) {
@@ -508,18 +541,13 @@ public class NoteDoc extends AppCompatActivity implements View.OnClickListener, 
                             .setCanceledOnTouchOutside(true)
                             .setPositiveButton(getString(R.string.text_button_positive_save), () -> {
                                 save();
-                                firstOpen = true;
-                                finish();
+                                finishActivity();
                             })
-                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), () -> {
-                                firstOpen = true;
-                                finish();
-                            })
+                            .setNegativeButton(getString(R.string.text_button_negative_donot_save), this::finishActivity)
                             .create()
                             .show();
                 } else {
-                    firstOpen = true;
-                    finish();
+                    finishActivity();
                 }
                 break;
             case R.id.ImageButton_toolbarDoneButton:

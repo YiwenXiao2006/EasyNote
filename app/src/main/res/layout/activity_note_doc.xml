@@ -46,7 +46,7 @@
                 <jp.wasabeef.richeditor.RichEditor
                     android:id="@+id/RichEditor_edit"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent" />
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/FAB_Save_Note"
@@ -65,7 +65,9 @@
                     app:backgroundTint="@color/PrimaryVariant" />
             </RelativeLayout>
 
-            <include layout="@layout/content_edit_doc_tools" />
+            <include layout="@layout/content_edit_doc_tools"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/edit_doc_tools" />
         </LinearLayout>
     </RelativeLayout>
 </LinearLayout>

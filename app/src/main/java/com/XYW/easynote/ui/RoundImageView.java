@@ -26,8 +26,8 @@ public class RoundImageView extends androidx.appcompat.widget.AppCompatImageView
 
     public RoundImageView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.RoundImageView);
-        mBorderRadius = typedArray.getDimensionPixelSize(R.styleable.RoundImageView_radius, 10);
+        TypedArray typedArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RoundImageView, defStyleAttr, 0);
+        mBorderRadius = typedArray.getDimensionPixelSize(R.styleable.RoundImageView_riv_radius, 10);
         if (Build.VERSION.SDK_INT < 18) {
             setLayerType(View.LAYER_TYPE_SOFTWARE, null);
         }

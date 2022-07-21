@@ -16,6 +16,5 @@
         android:scaleType="fitCenter"
         app:layout_aspectRatio="175%"
         app:layout_widthPercent="100%"
-        app:radius="5dp"
         app:srcCompat="@drawable/img_note_defult_cover" />
 </androidx.percentlayout.widget.PercentRelativeLayout>

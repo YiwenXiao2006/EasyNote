@@ -8,7 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="10dp"
-        app:radius="5dp"
+        app:riv_radius="5dp"
         app:srcCompat="@color/lightbackground" />
 
     <LinearLayout
@@ -46,5 +46,5 @@
         android:layout_height="30dp"
         android:layout_margin="10dp"
         android:background="@drawable/shape_fragment_note_recyclerview_icon"
-        app:radius="5dp" />
+        app:riv_radius="5dp" />
 </RelativeLayout>

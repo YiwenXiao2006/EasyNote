@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="15dp">
+
+    <EditText
+        android:id="@+id/EditText_dialog_edittext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textSize="15sp"
+        android:hint="@string/text_activity_edit_here"
+        android:inputType="text"
+        android:background="@drawable/ic_bg_edittext"
+        android:minHeight="40dp"
+        android:importantForAutofill="no" />
+</LinearLayout>

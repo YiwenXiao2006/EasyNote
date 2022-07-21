@@ -16,6 +16,7 @@
     <string name="title_menu_view_notes">View notes</string>
     <string name="title_menu_delete">Delete</string>
     <string name="title_menu_save">Save</string>
+    <string name="title_menu_rename">Rename</string>
     <string name="title_messagebox_permission_denied">Permission denied</string>
     <string name="title_messagebox_select_cover">Select cover</string>
     <string name="title_messagebox_file_exists">File exists</string>
@@ -42,6 +43,7 @@
     <string name="text_button_negative_album">Album</string>
     <string name="text_button_positive_save">Save</string>
     <string name="text_button_negative_donot_save">Do not save</string>
+    <string name="text_dialog_file_exists">*A file named with this theme already exists</string>
     <string name="message_exit">Are you sure you want to exit?</string>
     <string name="message_select_cover">Choose a way to select the cover</string>
     <string name="message_clear_cover">Clear the cover?</string>

@@ -49,7 +49,7 @@
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:background="@drawable/shape_fragment_note_recyclerview_icon"
-                app:radius="5dp" />
+                app:riv_radius="5dp" />
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 </LinearLayout>
