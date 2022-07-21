@@ -20,8 +20,10 @@ import androidx.core.os.EnvironmentCompat;
 import com.XYW.easynote.Fragment.NoteFragment;
 import com.XYW.easynote.R;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -235,7 +237,7 @@ public class IOManager {
      * @param file2 目标位置文件
      * @param flag 是否删除源文件,true为删除,false为保留
      */
-    public static void moveFile(File file1, File file2, boolean flag) {
+    public static String moveFile(File file1, File file2, boolean flag) {
         FileInputStream inStream = null;
         FileOutputStream outStream = null;
         try {
@@ -246,12 +248,14 @@ public class IOManager {
             outStream = new FileOutputStream(file2);
             FileChannel inChannel = inStream.getChannel();
             FileChannel outChannel = outStream.getChannel();
+            Log.d(TAG, "moveFile: " + inChannel.toString());
             inChannel.transferTo(0, inChannel.size(), outChannel);
             if (flag) {
                 file1.delete();
             }
         } catch (Exception e) {
             e.printStackTrace();
+            Log.d(TAG, "moveFile: error");
         } finally {
             try {
                 if (inStream != null) {
@@ -264,6 +268,58 @@ public class IOManager {
                 e.printStackTrace();
             }
         }
+        return file2.getPath();
+    }
+
+    /**
+     * 对文件重命名
+     * @param file  文件
+     */
+    public static String renameFile(File file, String reName){
+
+        if (file == null || !file.exists()) {
+            return null;
+        }
+
+        //前面路径必须一样才能修改成功
+        String path = Objects.requireNonNull(file.getParentFile()).getPath();
+        File newFile = new File(path);
+        if (!newFile.exists())
+            newFile.mkdirs();
+
+        newFile = new File(path, reName + "." + getExtensionName(file));
+        try {
+            newFile.createNewFile();
+            writeFile(newFile, readFile(file), false);
+            file.delete();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return newFile.getPath();
+    }
+
+    public static String renameImg(File file, String newName) {
+        Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        BufferedOutputStream stream = null;
+        File Img = new File(Objects.requireNonNull(file.getParentFile()).getPath(), newName + ".jpg");
+        try {
+            FileOutputStream fstream = new FileOutputStream(Img);
+            stream = new BufferedOutputStream(fstream);
+            stream.write(byteArrayOutputStream.toByteArray());
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }
+        return Img.getPath();
     }
 
     public static void mkdir(File file) {
@@ -498,6 +554,18 @@ public class IOManager {
         return false;
     }
 
+    public static String getExtensionName(File file) {
+        if (file == null) {
+            return null;
+        }
+        String name = file.getName();
+        int dot = name.lastIndexOf('.');
+        if (dot > -1 && dot < name.length() - 1) {
+            return name.substring(dot + 1);
+        }
+        return name;
+    }
+
     public static void renameNoteInCtt(Context context, String oldName, String newName) {
         File Notes_Contents = new File(context.getFilesDir().getPath() + File.separator + "Notes_Contents.ctt");
         List<NoteFragment.NoteTag> Tags = new ArrayList<>(IOManager.readNoteCtt(context, Notes_Contents));
@@ -510,17 +578,40 @@ public class IOManager {
             str.append(IOManager.NOTE_TAG + '\n').append(Tags.get(i).getTitle()).append('\n');
             for (int j = 0; j < Tags.get(i).getNotes().size(); j++) {
                 str.append(IOManager.NOTE_NOTE + '\n');
-                str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
-                str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
-                str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
                 if (!Objects.equals(Tags.get(i).getNotes().get(j).getTitle(), oldName)) {
+                    str.append(Tags.get(i).getNotes().get(j).getFile_Path()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_Name()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
                     str.append(Tags.get(i).getNotes().get(j).getTitle()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
                 } else {
+                    String oldPath = Tags.get(i).getNotes().get(j).getFile_Path();
+                    String newPath = oldPath.substring(0, oldPath.lastIndexOf('/') + 1) + newName;
+                    mkdir(new File(newPath));
+                    str.append(newPath).append('\n');
                     str.append(newName).append('\n');
+                    str.append(Tags.get(i).getNotes().get(j).getFile_End()).append('\n');
+                    str.append(newName).append('\n');
+                    File file = new File(Tags.get(i).getNotes().get(j).getFile_Path(), Tags.get(i).getNotes().get(j).getFile_Name() + "." + Tags.get(i).getNotes().get(j).getFile_End());
+                    moveFile(new File(renameFile(file, newName)), new File(newPath, newName + ".note"), true);
+                    if (!Objects.equals(Tags.get(i).getNotes().get(j).getDescribe_Path(), "null") && Tags.get(i).getNotes().get(j).getDescribe_Path() != null) {
+                        file = new File(Tags.get(i).getNotes().get(j).getDescribe_Path());
+                        str.append(moveFile(new File(renameFile(file, newName + "_describe")), new File(newPath, newName + "_describe." + getExtensionName(file)), true)).append('\n');
+                    } else {
+                        str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
+                    }
+                    str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
+                    if (!Objects.equals(Tags.get(i).getNotes().get(j).getBackground_Path(), "null") && Tags.get(i).getNotes().get(j).getBackground_Path() != null) {
+                        file = new File(Tags.get(i).getNotes().get(j).getBackground_Path());
+                        str.append(moveFile(new File(renameImg(file, newName + "_cover")), new File(newPath, newName + "_cover." + getExtensionName(file)), false)).append('\n');
+                    } else {
+                        str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
+                    }
+                    File oldFile = new File(oldPath);
+                    deleteDir(oldFile);
                 }
-                str.append(Tags.get(i).getNotes().get(j).getDescribe_Path()).append('\n');
-                str.append(Tags.get(i).getNotes().get(j).getIcon_ID()).append('\n');
-                str.append(Tags.get(i).getNotes().get(j).getBackground_Path()).append('\n');
                 str.append(IOManager.NOTE_ENDNOTE + '\n');
             }
             str.append(IOManager.NOTE_ENDTAG + '\n');

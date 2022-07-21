@@ -95,6 +95,7 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
         View view = inflater.inflate(R.layout.fragment_note, container, false);
         NoteFragment_Layout = view;
         this.container = container;
+        Log.d(TAG, "onCreateView:ddd " + new File("/data/user/0/com.XYW.easynote/files/Notes/1/1.note").exists());
         init(view);
         return view;
     }
@@ -725,7 +726,10 @@ public class NoteFragment extends Fragment implements UIManager.HideScrollListen
                                     .setCanceledOnTouchOutside(true)
                                     .setPositiveButton(context.getString(R.string.text_button_positive_default), () -> {
                                         if (!Objects.equals(newName, "")) {
-                                            Log.d(TAG, "showListMenu: ");
+                                            IOManager.renameNoteInCtt(context, note.getTitle(), newName);
+
+                                            Intent intent = new Intent("com.XYW.EasyNote.activity.CreateFile.refresh_noteList");
+                                            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                                         }
                                     })
                                     .setNegativeButton(context.getString(R.string.text_button_negative_default), null);
